@@ -10,15 +10,6 @@ use App\User;
 class UserRepository
 {
     /**
-     * @param string $tag
-     * @return bool
-     */
-    public function checkIfUserTagExists(string $tag): bool
-    {
-        return User::where('tag', $tag)->first() !== null;
-    }
-
-    /**
      * @param string $userTag
      * @return User|null
      */

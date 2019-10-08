@@ -2,13 +2,10 @@
 
 namespace App\Services;
 
-use App\Exceptions\FollowException;
-use App\Exceptions\UserException;
 use App\Repositories\FollowRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Contracts\View\Factory;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
@@ -21,14 +18,27 @@ class ProfileService
     use ServiceTrait;
 
     /**
+     * @var FollowRepository
+     */
+    protected $followRepository;
+
+    /**
+     * @param FollowRepository $followRepository
+     */
+    public function __construct(FollowRepository $followRepository)
+    {
+        $this->followRepository = $followRepository;
+    }
+
+    /**
      * @return View
      */
     public function displayProfile(): View
     {
         $userId = auth()->user()->getAuthIdentifier();
         $messages = (new MessageRepository())->getAllMessagesByUserId($userId);
-        $followingCount = (new FollowRepository())->getFollowingCount($userId);
-        $followersCount = (new FollowRepository())->getFollowersCount($userId);
+        $followingCount = $this->followRepository->getFollowingCount($userId);
+        $followersCount = $this->followRepository->getFollowersCount($userId);
         return view('profile', compact('messages', 'followingCount', 'followersCount'));
     }
 
@@ -52,14 +62,14 @@ class ProfileService
             if ($authenticatedUserId === $userId) {
                 return redirect('profile');
             }
-            $possibleFollow = (new FollowRepository())->checkPossibleToFollow($authenticatedUserId, $userId);
+            $possibleFollow = $this->followRepository->checkPossibleToFollow($authenticatedUserId, $userId);
             $possibleUnFollow = $this->checkUnFollowIsPossible($authenticatedUserId, $userId);
-            $possibleBan = (new FollowRepository())->checkPossibleToBan($authenticatedUserId, $userId);
+            $possibleBan = $this->followRepository->checkPossibleToBan($authenticatedUserId, $userId);
             $possibleUnBan = $this->checkUnBanIsPossible($authenticatedUserId, $userId);
         }
         $messages = $user->messages()->paginate(20);
-        $following = (new FollowRepository())->getFollowingCount($userId);
-        $followers = (new FollowRepository())->getFollowersCount($userId);
+        $following = $this->followRepository->getFollowingCount($userId);
+        $followers = $this->followRepository->getFollowersCount($userId);
         return view('user',
             compact(
                 'user',
@@ -81,7 +91,7 @@ class ProfileService
      */
     private function checkUnFollowIsPossible(int $authenticatedUserId, int $userId): bool
     {
-        return (new FollowRepository())->getFollowStatusForUnFollow($authenticatedUserId, $userId) !== null;
+        return $this->followRepository->getFollowStatusForUnFollow($authenticatedUserId, $userId) !== null;
     }
 
     /**
@@ -91,6 +101,6 @@ class ProfileService
      */
     private function checkUnBanIsPossible(int $authenticatedUserId, int $userId): bool
     {
-        return (new FollowRepository())->checkPossibleToUnBan($authenticatedUserId, $userId) !== null;
+        return $this->followRepository->checkPossibleToUnBan($authenticatedUserId, $userId) !== null;
     }
 }

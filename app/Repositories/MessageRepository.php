@@ -16,7 +16,7 @@ class MessageRepository
      */
     public function getMessagesFromFollowingUsers(int $userId)
     {
-        $userIds = $this->removeAuthUserIdAndStatusFromArray(
+        $userIds = $this->removeStatusAndAuthenticatedUserIdFromArray(
             (new FollowRepository())->getUserIdsOfFollowingUsers($userId),
             $userId
         );
@@ -29,7 +29,7 @@ class MessageRepository
      * @param int $userId
      * @return array
      */
-    private function removeAuthUserIdAndStatusFromArray(array $userIds, int $userId): array
+    private function removeStatusAndAuthenticatedUserIdFromArray(array $userIds, int $userId): array
     {
         foreach ($userIds as $key => $id) {
             unset($userIds[$key]['status']);

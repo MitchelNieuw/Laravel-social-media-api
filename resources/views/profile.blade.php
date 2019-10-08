@@ -20,8 +20,10 @@
                 <p class="h5 font-weight-normal text-primary mb-0">{{ '@'.auth()->user()->tag }}</p>
             </div>
             <div class="mt-3">
-                <p class="d-inline-block m-0 mr-3">Following {{ $followingCount }}</p>
-                <p class="d-inline-block m-0">Followers {{ $followersCount }}</p>
+                <a href="/user/{{ auth()->user()->tag }}/following"
+                   class="d-inline-block m-0 mr-3">Following {{ $followingCount }}</a>
+                <a href="/user/{{ auth()->user()->tag }}/followers"
+                   class="d-inline-block m-0">Followers {{ $followersCount }}</a>
                 <p class="">Since {{ auth()->user()->created_at->format('Y M d') }}</p>
             </div>
         </div>

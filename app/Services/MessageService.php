@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\RedirectErrorMessageEnum;
+use App\Enums\RedirectMessageEnum;
 use App\Exceptions\MessageException;
 use App\Message;
 use App\Repositories\MessageRepository;
@@ -78,6 +78,6 @@ class MessageService
         if (($message = $this->messageRepository->findById($messageId)) !== null) {
             return $message;
         }
-        throw new MessageException(RedirectErrorMessageEnum::NO_MESSAGE_FOUND);
+        throw new MessageException(RedirectMessageEnum::NO_MESSAGE_FOUND);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-use App\Enums\RedirectErrorMessageEnum;
+use App\Enums\RedirectMessageEnum;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 
@@ -18,6 +18,6 @@ class ErrorMessageHelper
     public function redirectErrorMessage($exception): RedirectResponse
     {
         Log::critical(json_encode($exception));
-        return back()->withErrors(RedirectErrorMessageEnum::OOPS_SOMETHING_WENT_WRONG);
+        return back()->withErrors(RedirectMessageEnum::OOPS_SOMETHING_WENT_WRONG);
     }
 }

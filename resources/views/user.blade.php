@@ -22,8 +22,10 @@
                         <p class="m-1 text-primary">{{ '@'.$user->tag }}</p>
                     </div>
                     <div class="mt-3">
-                        <p class="mb-0 mr-3 d-inline-block">Follows {{ $following }}</p>
-                        <p class="mb-0 d-inline-block">Followers {{ $followers }}</p>
+                        <a href="/user/{{ $user->tag }}/following"
+                           class="mb-0 mr-3 d-inline-block">Follows {{ $following }}</a>
+                        <a href="/user/{{ $user->tag }}/followers"
+                           class="mb-0 d-inline-block">Followers {{ $followers }}</a>
                         @auth
                             @if($possibleFollow)
                                 <form class="mt-2 float-right" action="/user/{{ $user->tag }}" method="post">
