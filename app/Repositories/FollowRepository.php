@@ -46,11 +46,11 @@ class FollowRepository
     {
         return Follow::where('user_id', $authenticatedUserId)
             ->where('follow_user_id', $followUserId)
-            ->whereRaw('NOT (status&4=4 OR status&1=1)')
+            ->whereRaw('NOT (status&1=1 OR status&4=4)')
             ->orWhere(static function ($query) use ($authenticatedUserId, $followUserId) {
                 return $query->where('follow_user_id', $authenticatedUserId)
                     ->where('user_id', $followUserId)
-                    ->whereRaw('NOT (status&8=8 OR status&2=2)');
+                    ->whereRaw('NOT (status&2=2 OR status&8=8)');
             })
             ->first();
     }
@@ -123,10 +123,10 @@ class FollowRepository
      * @param int $userId
      * @return Collection
      */
-    public function getFollowingUsers(int $userId): Collection
+    public function getFollowingUsersWithRelationships(int $userId): Collection
     {
         return $this->getFollowing($userId)
-            ->with('user:name,tag,profilePicture', 'following:name,tag,profilePicture')
+            ->with('user:id,name,tag,profilePicture', 'following:id,name,tag,profilePicture')
             ->get();
     }
 

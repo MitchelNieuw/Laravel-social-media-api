@@ -17,7 +17,7 @@ class ErrorMessageHelper
      */
     public function redirectErrorMessage($exception): RedirectResponse
     {
-        Log::critical(json_encode($exception, JSON_THROW_ON_ERROR));
+        Log::critical(json_encode($exception));
         return back()->withErrors(RedirectErrorMessageEnum::OOPS_SOMETHING_WENT_WRONG);
     }
 }

@@ -8,10 +8,14 @@ Route::get('/', static function () {
 Route::prefix('user')->group(static function () {
     Route::prefix('{userTag}')->group(static function () {
         Route::get('', 'ProfileController@show');
-        Route::patch('', 'FollowController@follow');
-        Route::patch('unfollow', 'FollowController@unFollow');
-        Route::patch('ban', 'BanController@ban');
-        Route::patch('unban', 'BanController@unBan');
+        Route::get('followers', 'ProfileController@showFollowers');
+        Route::get('following', 'ProfileController@showFollowing');
+        Route::middleware('auth')->group(static function () {
+            Route::patch('', 'FollowController@follow');
+            Route::patch('unfollow', 'FollowController@unFollow');
+            Route::patch('ban', 'BanController@ban');
+            Route::patch('unban', 'BanController@unBan');
+        });
     });
 });
 

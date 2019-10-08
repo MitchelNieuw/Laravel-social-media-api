@@ -7,6 +7,7 @@ use App\Exceptions\UserException;
 use App\Follow;
 use App\Repositories\FollowRepository;
 use App\Repositories\UserRepository;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @package App\Services
@@ -47,7 +48,7 @@ class FollowService
         $userToFollow = $this->checkUserExists($userTag);
         $userToFollowId = $userToFollow->getAttribute('id');
         $this->checkIfUserTriesToFollowSelf($authenticatedUserId, $userToFollowId);
-        $userFollowStatus = $this->getFollowStatusFollow($authenticatedUserId, $userToFollowId, $userTag);
+        $userFollowStatus = $this->getFollowStatusRecord($authenticatedUserId, $userToFollowId, $userTag);
         if (!$this->createFollowStatusRecord($userFollowStatus, $authenticatedUserId, $userToFollowId, 1)) {
             $status = $this->getNewFollowStatus($userFollowStatus, $authenticatedUserId);
             $this->followRepository->updateFollow($userFollowStatus, $status);
@@ -75,6 +76,29 @@ class FollowService
     }
 
     /**
+     * @param string $userTag
+     * @return Collection
+     * @throws UserException
+     */
+    public function getAllFollowing(string $userTag): Collection
+    {
+        $user = $this->checkUserExists($userTag);
+        return (new FollowRepository())->getFollowingUsersWithRelationships($user->getAttribute('id'));
+    }
+
+    /**
+     * @param string $userTag
+     * @return Collection
+     * @throws UserException
+     */
+    public function getAllFollowers(string $userTag): Collection
+    {
+        $user = $this->checkUserExists($userTag);
+        $followers = (new FollowRepository())->getFollowersWithRelationsByUserId($user->getAttribute('id'));
+        return $followers;
+    }
+
+    /**
      * @param Follow $userFollowStatus
      * @param int $authenticatedUserId
      */
@@ -91,7 +115,7 @@ class FollowService
      * @return Follow
      * @throws FollowException
      */
-    private function getFollowStatusFollow(int $authenticatedUserId, int $userToFollowId, string $userTag): Follow
+    private function getFollowStatusRecord(int $authenticatedUserId, int $userToFollowId, string $userTag): Follow
     {
         $userFollowStatus = $this->followRepository->getFollowStatusForFollow($authenticatedUserId, $userToFollowId);
         if ($userFollowStatus === null) {

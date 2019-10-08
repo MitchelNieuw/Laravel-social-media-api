@@ -34,7 +34,7 @@ class MessageController extends Controller
     }
 
     /**
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function store(): RedirectResponse
     {

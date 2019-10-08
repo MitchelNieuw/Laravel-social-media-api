@@ -21,11 +21,11 @@ trait ServiceTrait
      */
     protected function checkUserExists(string $userTag): User
     {
-        $userToUnBan = (new UserRepository())->getUserByUserTag($userTag);
-        if ($userToUnBan === null) {
+        $user = (new UserRepository())->getUserByUserTag($userTag);
+        if ($user === null) {
             throw new UserException('User with the tag ' . $userTag. ' doesnt exist');
         }
-        return $userToUnBan;
+        return $user;
     }
 
     /**

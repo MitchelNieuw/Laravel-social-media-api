@@ -2,9 +2,15 @@
 
 namespace App\Services;
 
+use App\Exceptions\FollowException;
+use App\Exceptions\UserException;
 use App\Repositories\FollowRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserRepository;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
 
 /**
@@ -12,6 +18,8 @@ use Illuminate\View\View;
  */
 class ProfileService
 {
+    use ServiceTrait;
+
     /**
      * @return View
      */
@@ -26,7 +34,7 @@ class ProfileService
 
     /**
      * @param string $userTag
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|View
+     * @return Factory|RedirectResponse|Redirector|View
      */
     public function displayUser(string $userTag)
     {

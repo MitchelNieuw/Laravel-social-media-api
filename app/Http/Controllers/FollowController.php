@@ -65,7 +65,7 @@ class FollowController extends Controller
             return back()->with(['message' => $message]);
         } catch (FollowException | UserException $exception) {
             return back()->withErrors($exception->getMessage());
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return $this->errorMessageHelper->redirectErrorMessage($exception);
         }
     }
