@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Repositories\BanRepository;
 use App\Repositories\FollowRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserRepository;
@@ -23,11 +24,18 @@ class ProfileService
     protected $followRepository;
 
     /**
-     * @param FollowRepository $followRepository
+     * @var BanRepository
      */
-    public function __construct(FollowRepository $followRepository)
+    protected $banRepository;
+
+    /**
+     * @param FollowRepository $followRepository
+     * @param BanRepository $banRepository
+     */
+    public function __construct(FollowRepository $followRepository, BanRepository $banRepository)
     {
         $this->followRepository = $followRepository;
+        $this->banRepository = $banRepository;
     }
 
     /**
@@ -63,9 +71,11 @@ class ProfileService
                 return redirect('profile');
             }
             $possibleFollow = $this->followRepository->checkPossibleToFollow($authenticatedUserId, $userId);
-            $possibleUnFollow = $this->checkUnFollowIsPossible($authenticatedUserId, $userId);
-            $possibleBan = $this->followRepository->checkPossibleToBan($authenticatedUserId, $userId);
-            $possibleUnBan = $this->checkUnBanIsPossible($authenticatedUserId, $userId);
+            $possibleUnFollow = (
+                $this->followRepository->getFollowStatusForUnFollow($authenticatedUserId, $userId) !== null
+            );
+            $possibleBan = $this->banRepository->checkPossibleToBan($authenticatedUserId, $userId);
+            $possibleUnBan = ($this->banRepository->checkPossibleToUnBan($authenticatedUserId, $userId) !== null);
         }
         $messages = $user->messages()->paginate(20);
         $following = $this->followRepository->getFollowingCount($userId);
@@ -82,25 +92,5 @@ class ProfileService
                 'followers',
             )
         );
-    }
-
-    /**
-     * @param int $authenticatedUserId
-     * @param int $userId
-     * @return bool
-     */
-    private function checkUnFollowIsPossible(int $authenticatedUserId, int $userId): bool
-    {
-        return $this->followRepository->getFollowStatusForUnFollow($authenticatedUserId, $userId) !== null;
-    }
-
-    /**
-     * @param int $authenticatedUserId
-     * @param int $userId
-     * @return bool
-     */
-    private function checkUnBanIsPossible(int $authenticatedUserId, int $userId): bool
-    {
-        return $this->followRepository->checkPossibleToUnBan($authenticatedUserId, $userId) !== null;
     }
 }

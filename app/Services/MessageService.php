@@ -5,13 +5,18 @@ namespace App\Services;
 use App\Enums\RedirectMessageEnum;
 use App\Exceptions\MessageException;
 use App\Message;
+use App\Notifications\UserNewMessageNotification;
 use App\Repositories\MessageRepository;
+use App\Repositories\NotificationRepository;
+use App\Repositories\RepositoryBase;
+use App\Repositories\UserRepository;
 use Exception;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * @package App\Services
  */
-class MessageService
+class MessageService extends RepositoryBase
 {
     /**
      * @var MessageRepository
@@ -33,6 +38,7 @@ class MessageService
     {
         $this->validateRequest();
         $this->saveMessage();
+        $this->sendNotifications(auth()->user()->getAuthIdentifier());
     }
 
     /**
@@ -59,13 +65,15 @@ class MessageService
     }
 
     /**
+     * @return Message
      */
-    private function saveMessage(): void
+    private function saveMessage(): Message
     {
         $message = new Message();
         $message->setAttribute('user_id', auth()->user()->id);
         $message->setAttribute('content', request()->get('content'));
         $message->save();
+        return $message;
     }
 
     /**
@@ -79,5 +87,27 @@ class MessageService
             return $message;
         }
         throw new MessageException(RedirectMessageEnum::NO_MESSAGE_FOUND);
+    }
+
+    /**
+     * @param int $authenticatedUserId
+     */
+    private function sendNotifications(int $authenticatedUserId): void
+    {
+        (new UserRepository())->getUsersByIds(
+            $this->getUserIdsForNotifications($authenticatedUserId)
+        );
+    }
+
+    /**
+     * @param int $authenticatedUserId
+     * @return array
+     */
+    private function getUserIdsForNotifications(int $authenticatedUserId): array
+    {
+        return $this->removeStatusAndAuthenticatedUserIdFromArray(
+            (new NotificationRepository())->getUserIdsWhereNotificationsArePossible($authenticatedUserId),
+            $authenticatedUserId
+        );
     }
 }

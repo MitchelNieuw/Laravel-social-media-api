@@ -22,6 +22,11 @@ Route::prefix('user')->group(static function () {
 Route::middleware('auth')->group(static function () {
     Route::get('dashboard', 'DashboardController@index');
     Route::get('profile', 'ProfileController@index');
+    Route::prefix('notifications')->group(static function () {
+        Route::get('', 'ProfileController@notifications');
+        Route::delete('delete', 'NotificationController@deleteAll');
+        Route::delete('{id}/delete', 'NotificationController@delete');
+    });
     Route::prefix('message')->group(static function () {
         Route::post('store', 'MessageController@store');
         Route::prefix('{id}')->group(static function () {

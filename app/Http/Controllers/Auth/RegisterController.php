@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * @package App\Http\Controllers\Auth
@@ -51,13 +52,17 @@ class RegisterController extends Controller
      */
     protected function create(array $data, Request $request)
     {
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'tag' => $data['tag'],
             'email' => $data['email'],
             'profilePicture' => $this->storeProfilePicture($request),
             'password' => Hash::make($data['password']),
         ]);
+        $user->update([
+            'jwt_token' => JWTAuth::fromUser($user),
+        ]);
+        return $user;
     }
 
     /**

@@ -36,12 +36,36 @@
                             @endif
                         @else
                             <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" id="notifications" data-toggle="dropdown"
+                                   aria-haspopup="true" aria-expanded="true" v-pre>
+                                    Notifications <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="notificationsMenu" id="notificationsMenu">
+                                    @php($notifications = auth()->user()->notifications()->limit(5)->get())
+                                    @if(count($notifications) > 0)
+                                        @foreach($notifications as $notification)
+                                            <li class="dropdown-header border-bottom">
+                                                <p>{{ $notification->data['message'] }}</p>
+                                                <a href="{{ $notification->data['link'] }}"
+                                                >{{ $notification->data['link'] }}</a>
+                                                <form action="/notifications/{{ $notification->data['notification_id'] }}/delete"
+                                                      method="post">
+                                                    @method('delete')
+                                                    <button class="btn btn-danger" type="submit">Delete</button>
+                                                </form>
+                                            </li>
+                                        @endforeach
+                                    @endif
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ auth()->user()->getAttribute('name') }} <span class="caret"></span>
+                                    {{ auth()->user()->name }} <span class="caret"></span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                     <a class="dropdown-item" href="{{ url('/profile') }}">Profile</a>
+                                    <a class="dropdown-item" href="{{ url('/notifications') }}">Notifications</a>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();"
@@ -61,6 +85,12 @@
         <main class="container py-5">
             @yield('content')
         </main>
+        @auth
+            <script>
+                const userId = {{ auth()->user()->getAuthIdentifier() }};
+                const JWTToken = '{{ auth()->user()->jwt_token }}';
+            </script>
+        @endauth
     </div>
 </body>
 </html>

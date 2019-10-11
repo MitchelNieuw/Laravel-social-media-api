@@ -48,10 +48,10 @@ class FollowService
         $authenticatedUserId = auth()->user()->getAuthIdentifier();
         $userToFollow = $this->checkUserExists($userTag);
         $userToFollowId = $userToFollow->getAttribute('id');
-        $this->checkIfUserTriesToFollowSelf($authenticatedUserId, $userToFollowId);
-        $userFollowStatus = $this->getFollowStatusRecord($authenticatedUserId, $userToFollowId, $userTag);
+        $this->checkUserTriesToFollowSelf($authenticatedUserId, $userToFollowId);
+        $userFollowStatus = $this->getFollowStatusRecord($authenticatedUserId, $userToFollowId);
         if (!$this->createFollowStatusRecord($userFollowStatus, $authenticatedUserId, $userToFollowId, 1)) {
-            $status = $this->getNewFollowStatus($userFollowStatus, $authenticatedUserId);
+            $status = $this->getNewStatus($userFollowStatus, $authenticatedUserId, '|', 'follow');
             $this->followRepository->updateFollow($userFollowStatus, $status);
         }
         return RedirectMessageEnum::FOLLOW_SUCCESSFUL;
@@ -68,7 +68,7 @@ class FollowService
         $authenticatedUserId = auth()->user()->getAuthIdentifier();
         $userToUnFollow = $this->checkUserExists($userTag);
         $userToUnFollowId = $userToUnFollow->getAttribute('id');
-        $this->checkIfUserTriesToUnFollowSelf($authenticatedUserId, $userToUnFollowId);
+        $this->checkUserTriesToUnFollowSelf($authenticatedUserId, $userToUnFollowId);
         $this->updateFollowRecordStatus(
             $this->getFollowStatusUnFollow($authenticatedUserId, $userToUnFollowId, $userTag),
             $authenticatedUserId
@@ -105,18 +105,17 @@ class FollowService
      */
     private function updateFollowRecordStatus(Follow $userFollowStatus, int $authenticatedUserId): void
     {
-        $status = $this->getNewUnFollowStatus($userFollowStatus, $authenticatedUserId);
+        $status = $this->getNewStatus($userFollowStatus, $authenticatedUserId, '^', 'follow');
         $this->followRepository->updateFollow($userFollowStatus, $status);
     }
 
     /**
      * @param int $authenticatedUserId
      * @param int $userToFollowId
-     * @param string $userTag
      * @return Follow
      * @throws FollowException
      */
-    private function getFollowStatusRecord(int $authenticatedUserId, int $userToFollowId, string $userTag): Follow
+    private function getFollowStatusRecord(int $authenticatedUserId, int $userToFollowId): Follow
     {
         $userFollowStatus = $this->followRepository->getFollowStatusForFollow($authenticatedUserId, $userToFollowId);
         if ($userFollowStatus === null) {
@@ -149,7 +148,7 @@ class FollowService
      * @param int $followUserId
      * @throws FollowException
      */
-    private function checkIfUserTriesToFollowSelf(int $authenticatedUserId, int $followUserId): void
+    private function checkUserTriesToFollowSelf(int $authenticatedUserId, int $followUserId): void
     {
         if ($authenticatedUserId === $followUserId) {
             throw new FollowException(RedirectMessageEnum::FOLLOWING_SELF_NOT_POSSIBLE);
@@ -161,44 +160,10 @@ class FollowService
      * @param int $unFollowUserId
      * @throws FollowException
      */
-    private function checkIfUserTriesToUnFollowSelf(int $authenticatedUserId, int $unFollowUserId): void
+    private function checkUserTriesToUnFollowSelf(int $authenticatedUserId, int $unFollowUserId): void
     {
         if ($authenticatedUserId === $unFollowUserId) {
             throw new FollowException(RedirectMessageEnum::UNFOLLOWING_SELF_NOT_POSSIBLE);
         }
-    }
-
-    /**
-     * @param Follow $userFollowStatus
-     * @param int $userId
-     * @return int
-     */
-    private function getNewFollowStatus(Follow $userFollowStatus, int $userId): int
-    {
-        $status = $userFollowStatus->getAttribute('status');
-        if ($userFollowStatus->getAttribute('user_id') === $userId) {
-            $status = $userFollowStatus->getAttribute('status') | 1 << 0;
-        }
-        if ($userFollowStatus->getAttribute('follow_user_id') === $userId) {
-            $status = $userFollowStatus->getAttribute('status') | 1 << 1;
-        }
-        return $status;
-    }
-
-    /**
-     * @param Follow $userFollowStatus
-     * @param int $userId
-     * @return int
-     */
-    private function getNewUnFollowStatus(Follow $userFollowStatus, int $userId): int
-    {
-        $status = $userFollowStatus->getAttribute('status');
-        if ($userFollowStatus->getAttribute('user_id') === $userId) {
-            $status = $userFollowStatus->getAttribute('status') ^ 1 << 0;
-        }
-        if ($userFollowStatus->getAttribute('follow_user_id') === $userId) {
-            $status = $userFollowStatus->getAttribute('status') ^ 1 << 1;
-        }
-        return $status;
     }
 }

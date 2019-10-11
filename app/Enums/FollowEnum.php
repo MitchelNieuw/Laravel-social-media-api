@@ -7,14 +7,18 @@ namespace App\Enums;
  */
 class FollowEnum
 {
-    public const USER1_FOLLOWS_USER2 = 1 << 0; // 0001 = 1
-    public const USER2_FOLLOWS_USER1 = 1 << 1; // 0010 = 2
-    public const USER1_BANNED_USER2 = 1 << 2; // 0100 = 4
-    public const USER2_BANNED_USER1 = 1 << 3; // 1000 = 8
+    public const USER1_FOLLOWS_USER2 = 1 << 0; // 000001 = 1
+    public const USER2_FOLLOWS_USER1 = 1 << 1; // 000010 = 2
+    public const USER1_BANNED_USER2 = 1 << 2; // 0000100 = 4
+    public const USER2_BANNED_USER1 = 1 << 3; // 001000 = 8
+    public const USER1_NOTIFICATIONS_ON_FOR_USER2 = 1 << 4; // 010000 = 16
+    public const USER2_NOTIFICATIONS_ON_FOR_USER1 = 1 << 5; // 100000 = 32
+
+
+
 
     // SELECT * FROM follow WHERE user_id = $userId AND followers status&2=2 AND NOT status&8=8
     // returns => 2, 3, 6, 7
-
     // SELECT * FROM follow WHERE follow_user_id = $userId AND followers status&1=1 AND NOT status&4=4
     // returns => 1, 3, 9, 11
 
@@ -26,7 +30,6 @@ class FollowEnum
     //   AND NOT (status& 8=8 OR status& 2=2);
     //
     //  returns => 2, 8, 10, 16
-
 
     /*
      * tableName:

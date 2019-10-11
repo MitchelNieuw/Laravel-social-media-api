@@ -6,6 +6,7 @@ use App\Enums\RedirectMessageEnum;
 use App\Exceptions\BanException;
 use App\Exceptions\UserException;
 use App\Follow;
+use App\Repositories\BanRepository;
 use App\Repositories\FollowRepository;
 use App\Repositories\UserRepository;
 
@@ -27,13 +28,23 @@ class BanService
     protected $followRepository;
 
     /**
+     * @var BanRepository
+     */
+    protected $banRepository;
+
+    /**
      * @param UserRepository $userRepository
      * @param FollowRepository $followRepository
+     * @param BanRepository $banRepository
      */
-    public function __construct(UserRepository $userRepository, FollowRepository $followRepository)
-    {
+    public function __construct(
+        UserRepository $userRepository,
+        FollowRepository $followRepository,
+        BanRepository $banRepository
+    ) {
         $this->userRepository = $userRepository;
         $this->followRepository = $followRepository;
+        $this->banRepository = $banRepository;
     }
 
     /**
@@ -50,7 +61,7 @@ class BanService
         $this->checkUserBanSelf($authenticatedUserId, $userToBanId);
         $userFollowStatus = $this->checkUserGotUnBanned($authenticatedUserId, $userToBanId);
         if (!$this->createFollowStatusRecord($userFollowStatus, $authenticatedUserId, $userToBanId, 4)){
-            $this->updateFollowRecordBanUser($userFollowStatus, $authenticatedUserId);
+            $this->updateFollowRecordUser($userFollowStatus, $authenticatedUserId, '|');
         }
         return RedirectMessageEnum::BAN_SUCCESSFUL;
     }
@@ -67,8 +78,8 @@ class BanService
         $userToUnBan = $this->checkUserExists($userTag);
         $userToUnBanId = $userToUnBan->getAttribute('id');
         $this->checkUserUnBanSelf($authenticatedUserId, $userToUnBanId);
-        $userFollowStatus = $this->checkUserGotBanned($userTag, $authenticatedUserId, $userToUnBanId);
-        $this->updateFollowRecordUnBanUser($userFollowStatus, $authenticatedUserId);
+        $userFollowStatus = $this->checkUserGotBanned($authenticatedUserId, $userToUnBanId);
+        $this->updateFollowRecordUser($userFollowStatus, $authenticatedUserId, '^');
         return RedirectMessageEnum::UNBAN_SUCCESSFUL;
     }
 
@@ -80,7 +91,7 @@ class BanService
      */
     private function checkUserGotUnBanned(int $authenticatedUserId, int $userToBanId): Follow
     {
-        $userFollowStatus = $this->followRepository->getFollowStatusForBan($authenticatedUserId, $userToBanId);
+        $userFollowStatus = $this->banRepository->getFollowStatusForBan($authenticatedUserId, $userToBanId);
         if ($userFollowStatus === null) {
             throw new BanException(RedirectMessageEnum::USER_ALREADY_UNBANNED);
         }
@@ -90,37 +101,25 @@ class BanService
     /**
      * @param Follow $userFollowStatus
      * @param int $authenticatedUserId
+     * @param string $operator
      */
-    private function updateFollowRecordBanUser(Follow $userFollowStatus, int $authenticatedUserId): void
+    private function updateFollowRecordUser(Follow $userFollowStatus, int $authenticatedUserId, string $operator): void
     {
         if ($userFollowStatus !== null) {
-            $status = $this->getNewBanStatus($userFollowStatus, $authenticatedUserId);
+            $status = $this->getNewStatus($userFollowStatus, $authenticatedUserId, $operator, 'ban');
             $this->followRepository->updateFollow($userFollowStatus, $status);
         }
     }
 
     /**
-     * @param Follow $userFollowStatus
-     * @param int $authenticatedUserId
-     */
-    private function updateFollowRecordUnBanUser(Follow $userFollowStatus, int $authenticatedUserId): void
-    {
-        if ($userFollowStatus !== null) {
-            $status = $this->getNewUnBanStatus($userFollowStatus, $authenticatedUserId);
-            $this->followRepository->updateFollow($userFollowStatus, $status);
-        }
-    }
-
-    /**
-     * @param string $userTag
      * @param int $authenticatedUserId
      * @param int $userToUnBanId
      * @return Follow
      * @throws BanException
      */
-    private function checkUserGotBanned(string $userTag, int $authenticatedUserId, int $userToUnBanId): Follow
+    private function checkUserGotBanned(int $authenticatedUserId, int $userToUnBanId): Follow
     {
-        $userFollowStatus = $this->followRepository->checkPossibleToUnBan($authenticatedUserId, $userToUnBanId);
+        $userFollowStatus = $this->banRepository->checkPossibleToUnBan($authenticatedUserId, $userToUnBanId);
         if ($userFollowStatus === null) {
             throw new BanException(RedirectMessageEnum::USER_NOT_BANNED);
         }
@@ -149,39 +148,5 @@ class BanService
         if ($authenticatedUserId === $userToBanId) {
             throw new BanException(RedirectMessageEnum::UNBANNING_SELF_NOT_POSSIBLE);
         }
-    }
-
-    /**
-     * @param Follow $userFollowStatus
-     * @param int $authenticatedUserId
-     * @return int
-     */
-    private function getNewBanStatus(Follow $userFollowStatus, int $authenticatedUserId): int
-    {
-        $status = $userFollowStatus->getAttribute('status');
-        if ($userFollowStatus->getAttribute('user_id') === $authenticatedUserId) {
-            $status = $userFollowStatus->getAttribute('status') | 1 << 2;
-        }
-        if ($userFollowStatus->getAttribute('follow_user_id') === $authenticatedUserId) {
-            $status = $userFollowStatus->getAttribute('status') | 1 << 3;
-        }
-        return $status;
-    }
-
-    /**
-     * @param Follow $userFollowStatus
-     * @param int $authenticatedUserId
-     * @return int
-     */
-    private function getNewUnBanStatus(Follow $userFollowStatus, int $authenticatedUserId): int
-    {
-        $status = $userFollowStatus->getAttribute('status');
-        if ($userFollowStatus->getAttribute('user_id') === $authenticatedUserId) {
-            $status = $userFollowStatus->getAttribute('status') ^ 1 << 2;
-        }
-        if ($userFollowStatus->getAttribute('follow_user_id') === $authenticatedUserId) {
-            $status = $userFollowStatus->getAttribute('status') ^ 1 << 3;
-        }
-        return $status;
     }
 }

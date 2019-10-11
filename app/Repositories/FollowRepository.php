@@ -8,35 +8,8 @@ use Illuminate\Database\Eloquent\Collection;
 /**
  * @package App\Repositories
  */
-class FollowRepository
+class FollowRepository extends RepositoryBase
 {
-    /**
-     * @param int $userId
-     * @param int $followUserId
-     * @param int $status
-     * @return Follow
-     */
-    public function follow(int $userId, int $followUserId, int $status): Follow
-    {
-        return Follow::create([
-            'user_id' => $userId,
-            'follow_user_id' => $followUserId,
-            'status' => $status,
-        ]);
-    }
-
-    /**
-     * @param Follow $follow
-     * @param int $status
-     * @return bool
-     */
-    public function updateFollow(Follow $follow, int $status): bool
-    {
-        return $follow->update([
-            'status' => $status
-        ]);
-    }
-
     /**
      * @param int $authenticatedUserId
      * @param int $followUserId
@@ -58,24 +31,6 @@ class FollowRepository
     /**
      * @param int $authenticatedUserId
      * @param int $followUserId
-     * @return Follow|null
-     */
-    public function getFollowStatusForBan(int $authenticatedUserId, int $followUserId): ?Follow
-    {
-        return Follow::where('user_id', $authenticatedUserId)
-            ->where('follow_user_id', $followUserId)
-            ->whereRaw('NOT status&4=4')
-            ->orWhere(static function ($query) use ($authenticatedUserId, $followUserId) {
-                return $query->where('follow_user_id', $authenticatedUserId)
-                    ->where('user_id', $followUserId)
-                    ->whereRaw('NOT status&8=8');
-            })
-            ->first();
-    }
-
-    /**
-     * @param int $authenticatedUserId
-     * @param int $followUserId
      * @return bool
      */
     public function checkPossibleToFollow(int $authenticatedUserId, int $followUserId): bool
@@ -84,20 +39,6 @@ class FollowRepository
             return true;
         }
         $follow = $this->getFollowStatusForFollow($authenticatedUserId, $followUserId);
-        return ($follow !== null);
-    }
-
-    /**
-     * @param int $authenticatedUserId
-     * @param int $followUserId
-     * @return bool
-     */
-    public function checkPossibleToBan(int $authenticatedUserId, int $followUserId): bool
-    {
-        if ($this->getFollowRecord($authenticatedUserId, $followUserId) === null) {
-            return true;
-        }
-        $follow = $this->getFollowStatusForBan($authenticatedUserId, $followUserId);
         return ($follow !== null);
     }
 
@@ -151,24 +92,6 @@ class FollowRepository
     }
 
     /**
-     * @param int $authenticatedUserId
-     * @param int $followUserId
-     * @return Follow|null
-     */
-    public function checkPossibleToUnBan(int $authenticatedUserId, int $followUserId): ?Follow
-    {
-        return Follow::where('user_id', $authenticatedUserId)
-            ->where('follow_user_id', $followUserId)
-            ->whereRaw('status&4=4')
-            ->orWhere(static function ($query) use ($authenticatedUserId, $followUserId) {
-                return $query->where('follow_user_id', $authenticatedUserId)
-                    ->where('user_id', $followUserId)
-                    ->whereRaw('status&8=8');
-            })
-            ->first();
-    }
-
-    /**
      * @param int $userId
      * @return int
      */
@@ -186,22 +109,6 @@ class FollowRepository
         return $this->getFollowers($userId)
             ->with('user:id,name,tag,profilePicture', 'following:id,name,tag,profilePicture')
             ->get();
-    }
-
-    /**
-     * @param int $authenticatedUserId
-     * @param int $followUserId
-     * @return Follow|null
-     */
-    private function getFollowRecord(int $authenticatedUserId, int $followUserId): ?Follow
-    {
-        return Follow::where('user_id', $authenticatedUserId)
-            ->where('follow_user_id', $followUserId)
-            ->orWhere(static function ($query) use ($authenticatedUserId, $followUserId) {
-                return $query->where('follow_user_id', $authenticatedUserId)
-                    ->where('user_id', $followUserId);
-            })
-            ->first();
     }
 
     /**

@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\Log;
 class ErrorMessageHelper
 {
     /**
-     * @param $exception
+     * @param \Exception $exception
      * @return RedirectResponse
      */
-    public function redirectErrorMessage($exception): RedirectResponse
+    public function redirectErrorMessage(\Exception $exception): RedirectResponse
     {
-        Log::critical(json_encode($exception));
+        Log::critical($exception->getMessage());
         return back()->withErrors(RedirectMessageEnum::OOPS_SOMETHING_WENT_WRONG);
     }
 }

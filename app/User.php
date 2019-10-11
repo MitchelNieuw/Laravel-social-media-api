@@ -5,11 +5,12 @@ namespace App;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 /**
  * @package App
  */
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
 
@@ -17,7 +18,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'tag', 'email', 'profilePicture', 'password',
+        'name', 'tag', 'email', 'profilePicture', 'jwt_token', 'password',
     ];
 
     /**
@@ -56,5 +57,22 @@ class User extends Authenticatable
     public function followed(): HasMany
     {
         return $this->hasMany(Follow::class, 'follow_user_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * @return array
+     */
+    public function getJWTCustomClaims(): array
+    {
+        return [];
     }
 }

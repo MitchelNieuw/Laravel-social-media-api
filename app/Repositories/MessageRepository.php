@@ -8,8 +8,17 @@ use Exception;
 /**
  * @package App\Repositories
  */
-class MessageRepository
+class MessageRepository extends RepositoryBase
 {
+    /**
+     * @param int $id
+     * @return Message|null
+     */
+    public function getMessageById(int $id): ?Message
+    {
+        return Message::find($id);
+    }
+
     /**
      * @param int $userId
      * @return mixed
@@ -22,25 +31,6 @@ class MessageRepository
         );
         return Message::with('user:id,name,tag,profilePicture')->whereIn('user_id', $userIds)
             ->orderByDesc('created_at')->paginate(40);
-    }
-
-    /**
-     * @param array $userIds
-     * @param int $userId
-     * @return array
-     */
-    private function removeStatusAndAuthenticatedUserIdFromArray(array $userIds, int $userId): array
-    {
-        foreach ($userIds as $key => $id) {
-            unset($userIds[$key]['status']);
-            if ($id['user_id'] === $userId) {
-                unset($userIds[$key]['user_id']);
-            }
-            if ($id['follow_user_id'] === $userId) {
-                unset($userIds[$key]['follow_user_id']);
-            }
-        }
-        return $userIds;
     }
 
     /**

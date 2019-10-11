@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\UserException;
 use App\Helpers\ErrorMessageHelper;
+use App\Repositories\UserRepository;
 use App\Services\FollowService;
 use App\Services\ProfileService;
 use Exception;
@@ -11,6 +12,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * @package App\Http\Controllers
@@ -66,6 +68,16 @@ class ProfileController extends Controller
         } catch (Exception $exception) {
             return $this->errorMessageHelper->redirectErrorMessage($exception);
         }
+    }
+
+    /**
+     * @return Factory|View
+     */
+    public function notifications()
+    {
+        $user = (new UserRepository())->getUserById(auth()->user()->getAuthIdentifier());
+        $notifications = $user->notifications->sortBy('read_at');
+        return view('notifications', compact('notifications'));
     }
 
     /**

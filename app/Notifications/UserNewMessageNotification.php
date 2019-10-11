@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -14,42 +13,43 @@ class UserNewMessageNotification extends Notification
     use Queueable;
 
     /**
-     * @return void
+     * @var string
      */
-    public function __construct()
-    {
+    protected $userTag;
 
+    /**
+     * @var int
+     */
+    protected $messageId;
+
+    /**
+     * @param string $userTag
+     * @param int $messageId
+     */
+    public function __construct(string $userTag, int $messageId)
+    {
+        $this->userTag = $userTag;
+        $this->messageId = $messageId;
     }
 
     /**
-     * @param mixed $notifiable
      * @return array
      */
-    public function via($notifiable): array
+    public function via(): array
     {
-        return ['database'];
+        return ['database', 'broadcast'];
     }
 
     /**
-     * @param mixed $notifiable
-     * @return MailMessage
-     */
-    public function toMail($notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
-    }
-
-    /**
-     * @param mixed $notifiable
      * @return array
      */
-    public function toArray($notifiable): array
+    public function toArray(): array
     {
         return [
-            //
+            'notification_id' => $this->id,
+            'messageId' => $this->messageId,
+            'message' => '@'.$this->userTag.' placed a new message',
+            'link' => url('/user') . '/' . $this->userTag . '/message/' . $this->messageId,
         ];
     }
 }
