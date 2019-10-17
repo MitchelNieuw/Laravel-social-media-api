@@ -7,6 +7,7 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
     <script src="{{ asset('js/app.js') }}" defer></script>
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
 </head>
 <body class="bg-light border-0">
     <div id="app">
@@ -85,12 +86,12 @@
         <main class="container py-5">
             @yield('content')
         </main>
-        @auth
-            <script>
-                const userId = {{ auth()->user()->getAuthIdentifier() }};
-                const JWTToken = '{{ auth()->user()->jwt_token }}';
-            </script>
-        @endauth
     </div>
+    @auth
+        <script>
+            const userId = {{ auth()->user()->getAuthIdentifier() }};
+            const JWTToken = '{{ auth()->user()->jwt_token }}';
+        </script>
+    @endauth
 </body>
 </html>

@@ -33,22 +33,24 @@ class UserNewMessageNotification extends Notification
     }
 
     /**
+     * @param mixed $notifiable
      * @return array
      */
-    public function via(): array
+    public function via($notifiable): array
     {
         return ['database', 'broadcast'];
     }
 
     /**
+     * @param mixed $notifiable
      * @return array
      */
-    public function toArray(): array
+    public function toArray($notifiable): array
     {
         return [
             'notification_id' => $this->id,
             'messageId' => $this->messageId,
-            'message' => '@'.$this->userTag.' placed a new message',
+            'message' => '@' . $this->userTag . ' placed a new message',
             'link' => url('/user') . '/' . $this->userTag . '/message/' . $this->messageId,
         ];
     }

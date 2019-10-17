@@ -11,7 +11,10 @@ use App\Repositories\NotificationRepository;
 use App\Repositories\RepositoryBase;
 use App\Repositories\UserRepository;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * @package App\Services
@@ -32,31 +35,42 @@ class MessageService extends RepositoryBase
     }
 
     /**
+     * @param Request $request
+     * @param int $userId
+     * @param string $messageContent
+     * @return Message
      * @throws MessageException
      */
-    public function storeMessage(): void
+    public function storeMessage(Request $request, int $userId, string $messageContent): Message
     {
-        $this->validateRequest();
-        $this->saveMessage();
-        $this->sendNotifications(auth()->user()->getAuthIdentifier());
+        $this->validateRequest($request);
+        $message = $this->saveMessage($userId, $messageContent);
+        $this->sendNotifications($userId);
+        return $message;
     }
 
     /**
      * @param int $messageId
-     * @throws MessageException|Exception
+     * @param int $authenticatedUserId
+     * @throws MessageException
+     * @throws Exception
      */
-    public function deleteMessage(int $messageId): void
+    public function deleteMessage(int $messageId, int $authenticatedUserId): void
     {
         $message = $this->checkMessageExists($messageId);
+        if ((int)$message->user_id !== $authenticatedUserId) {
+            throw new MessageException('This is not your message');
+        }
         $this->messageRepository->delete($message);
     }
 
     /**
+     * @param Request $request
      * @throws MessageException
      */
-    private function validateRequest(): void
+    private function validateRequest(Request $request): void
     {
-        $validator = validator(request()->all(), [
+        $validator = validator($request->all(), [
             'content' => 'required|string|max:500',
         ]);
         if ($validator->fails()) {
@@ -65,13 +79,15 @@ class MessageService extends RepositoryBase
     }
 
     /**
+     * @param int $userId
+     * @param string $messageContent
      * @return Message
      */
-    private function saveMessage(): Message
+    private function saveMessage(int $userId, string $messageContent): Message
     {
         $message = new Message();
-        $message->setAttribute('user_id', auth()->user()->id);
-        $message->setAttribute('content', request()->get('content'));
+        $message->setAttribute('user_id', $userId);
+        $message->setAttribute('content', $messageContent);
         $message->save();
         return $message;
     }

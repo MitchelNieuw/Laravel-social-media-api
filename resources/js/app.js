@@ -38,3 +38,18 @@ $(document).ready(function() {
             });
     }
 });
+
+import Vue from 'vue';
+import VueCookies from 'vue-cookies';
+import CreateMessage from "./components/CreateMessage";
+import UserMessages from "./components/UserMessages";
+
+Vue.use(VueCookies);
+VueCookies.config('7d');
+
+Vue.component('create-message', CreateMessage);
+Vue.component('user-messages', UserMessages);
+
+const app = new Vue({
+    el: '#app',
+});

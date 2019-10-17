@@ -60,7 +60,7 @@ abstract class RepositoryBase
      * @param int $followUserId
      * @return Follow|null
      */
-    protected function getFollowRecord(int $authenticatedUserId, int $followUserId): ?Follow
+    public function getFollowRecord(int $authenticatedUserId, int $followUserId): ?Follow
     {
         return Follow::where('user_id', $authenticatedUserId)
             ->where('follow_user_id', $followUserId)

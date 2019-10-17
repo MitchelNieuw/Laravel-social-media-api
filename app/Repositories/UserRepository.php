@@ -11,6 +11,15 @@ use Illuminate\Database\Eloquent\Collection;
 class UserRepository
 {
     /**
+     * @param string $token
+     * @return User|null
+     */
+    public function getUserByJwtToken(string $token): ?User
+    {
+        return User::where('jwt_token', $token)->first();
+    }
+
+    /**
      * @param int $id
      * @return User|null
      */

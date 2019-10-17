@@ -7,6 +7,7 @@ use App\Helpers\ErrorMessageHelper;
 use App\Services\MessageService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 /**
  * @package App\Http\Controllers
@@ -34,12 +35,17 @@ class MessageController extends Controller
     }
 
     /**
+     * @param Request $request
      * @return RedirectResponse
      */
-    public function store(): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         try {
-            $this->messageService->storeMessage();
+            $this->messageService->storeMessage(
+                $request,
+                auth()->user()->getAuthIdentifier(),
+                $request->get('content')
+            );
             return back();
         } catch (MessageException $exception) {
             return back()->withErrors($exception->getMessage());
@@ -55,7 +61,7 @@ class MessageController extends Controller
     public function delete(int $id): RedirectResponse
     {
         try {
-            $this->messageService->deleteMessage($id);
+            $this->messageService->deleteMessage($id, auth()->user()->getAuthIdentifier());
             return back();
         } catch (MessageException $exception) {
             return back()->withErrors($exception->getMessage());

@@ -16,11 +16,7 @@ class BanRepository extends RepositoryBase
      */
     public function checkPossibleToBan(int $authenticatedUserId, int $followUserId): bool
     {
-        if ($this->getFollowRecord($authenticatedUserId, $followUserId) === null) {
-            return true;
-        }
-        $follow = $this->getFollowStatusForBan($authenticatedUserId, $followUserId);
-        return ($follow !== null);
+        return ($this->getFollowStatusForBan($authenticatedUserId, $followUserId) !== null);
     }
 
     /**
@@ -46,7 +42,7 @@ class BanRepository extends RepositoryBase
      * @param int $followUserId
      * @return Follow|null
      */
-    public function checkPossibleToUnBan(int $authenticatedUserId, int $followUserId): ?Follow
+    public function getFollowStatusForUnBan(int $authenticatedUserId, int $followUserId): ?Follow
     {
         return Follow::where('user_id', $authenticatedUserId)
             ->where('follow_user_id', $followUserId)

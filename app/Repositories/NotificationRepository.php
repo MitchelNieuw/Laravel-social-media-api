@@ -12,19 +12,19 @@ class NotificationRepository extends RepositoryBase
     /**
      * @param int $authenticatedUserId
      * @param int $followUserId
-     * @return Follow
+     * @return Follow|null
      */
-    public function getFollowStatusForNotificationOn(int $authenticatedUserId, int $followUserId): Follow
+    public function getFollowStatusForNotificationOn(int $authenticatedUserId, int $followUserId): ?Follow
     {
         return Follow::where('user_id', $authenticatedUserId)
             ->where('follow_user_id', $followUserId)
             ->whereRaw('status&1=1')
-            ->whereRaw('NOT status&4=4')
+            ->whereRaw('NOT (status&4=4 OR status&16=16)')
             ->orWhere(static function ($query) use ($authenticatedUserId, $followUserId) {
                 return $query->where('follow_user_id', $authenticatedUserId)
                     ->where('user_id', $followUserId)
                     ->whereRaw('status&2=2')
-                    ->whereRaw('NOT status&8=8');
+                    ->whereRaw('NOT (status&8=8 OR status&32=32)');
             })
             ->first();
     }
@@ -32,9 +32,9 @@ class NotificationRepository extends RepositoryBase
     /**
      * @param int $authenticatedUserId
      * @param int $followUserId
-     * @return Follow
+     * @return Follow|null
      */
-    public function getFollowStatusForNotificationOff(int $authenticatedUserId, int $followUserId): Follow
+    public function getFollowStatusForNotificationOff(int $authenticatedUserId, int $followUserId): ?Follow
     {
         return Follow::where('user_id', $authenticatedUserId)
             ->where('follow_user_id', $followUserId)
@@ -70,5 +70,15 @@ class NotificationRepository extends RepositoryBase
             })
             ->get()
             ->toArray();
+    }
+
+    /**
+     * @param int $authenticatedUserId
+     * @param int $followUserId
+     * @return bool
+     */
+    public function checkPossibleToTurnOnNotifications(int $authenticatedUserId, int $followUserId): bool
+    {
+        return ($this->getFollowStatusForNotificationOn($authenticatedUserId, $followUserId) !== null);
     }
 }

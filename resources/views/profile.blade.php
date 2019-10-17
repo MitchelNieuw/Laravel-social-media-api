@@ -27,33 +27,7 @@
                 <p class="">Since {{ auth()->user()->created_at->format('Y M d') }}</p>
             </div>
         </div>
-        <div class="col-md-6 mb-2">
-            <div class="card">
-                <div class="card-body">
-                    <form action="/message/store" method="post">
-                        @csrf
-                        <div class="form-group">
-                            <label for="content">Message</label>
-                            <textarea name="content" class="form-control" id="content"></textarea>
-                        </div>
-                        <button class="btn btn-outline-dark float-right">Post</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        <create-message></create-message>
     </div>
-    @if(count($messages) > 0)
-        @foreach($messages as $message)
-            <div class="row">
-                <div class="col-md-6 mx-auto m-2">
-                    <div class="card">
-                        <div class="card-body">
-                            <p class="mb-0">{!! nl2br($message->content) !!}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endforeach
-        {{ $messages->links() }}
-    @endif
+    <user-messages></user-messages>
 @endsection

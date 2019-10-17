@@ -39,7 +39,7 @@ class MessageRepository extends RepositoryBase
      */
     public function getAllMessagesByUserId(int $userId)
     {
-        return Message::where('user_id', $userId)->paginate(40);
+        return Message::where('user_id', $userId)->orderBy('created_at', 'DESC')->paginate(40);
     }
 
     /**

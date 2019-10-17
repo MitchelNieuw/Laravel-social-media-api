@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\NotificationException;
+use App\Exceptions\UserException;
 use App\Helpers\ErrorMessageHelper;
 use App\Services\NotificationService;
 use Exception;
@@ -33,13 +35,15 @@ class NotificationController extends Controller
 
     /**
      * @param string $userTag
-     * @return RedirectResponse
+     * @return RedirectResponse|null
      */
-    public function turnOnNotifications(string $userTag)
+    public function turnOnNotifications(string $userTag): ?RedirectResponse
     {
         try {
             $this->notificationService->turnOnNotifications($userTag);
             return back();
+        } catch (UserException | NotificationException $exception) {
+            return back()->withErrors($exception->getMessage());
         } catch (Exception $exception) {
             return $this->errorMessageHelper->redirectErrorMessage($exception);
         }
@@ -47,13 +51,15 @@ class NotificationController extends Controller
 
     /**
      * @param string $userTag
-     * @return RedirectResponse
+     * @return RedirectResponse|null
      */
-    public function turnOffNotifications(string $userTag)
+    public function turnOffNotifications(string $userTag): ?RedirectResponse
     {
         try {
             $this->notificationService->turnOffNotifications($userTag);
             return back();
+        } catch (UserException | NotificationException $exception) {
+            return back()->withErrors($exception->getMessage());
         } catch (Exception $exception) {
             return $this->errorMessageHelper->redirectErrorMessage($exception);
         }

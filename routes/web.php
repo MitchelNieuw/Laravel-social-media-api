@@ -13,6 +13,8 @@ Route::prefix('user')->group(static function () {
         Route::middleware('auth')->group(static function () {
             Route::patch('', 'FollowController@follow');
             Route::patch('unfollow', 'FollowController@unFollow');
+            Route::post('notifications-on', 'NotificationController@turnOnNotifications');
+            Route::patch('notifications-off', 'NotificationController@turnOffNotifications');
             Route::patch('ban', 'BanController@ban');
             Route::patch('unban', 'BanController@unBan');
         });
@@ -24,6 +26,7 @@ Route::middleware('auth')->group(static function () {
     Route::get('profile', 'ProfileController@index');
     Route::prefix('notifications')->group(static function () {
         Route::get('', 'ProfileController@notifications');
+
         Route::delete('delete', 'NotificationController@deleteAll');
         Route::delete('{id}/delete', 'NotificationController@delete');
     });

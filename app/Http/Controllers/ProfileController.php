@@ -64,7 +64,14 @@ class ProfileController extends Controller
     public function show(string $userTag)
     {
         try {
-            return $this->profileService->displayUser($userTag);
+            $user = (new UserRepository())->getUserByTagWithMessages($userTag);
+            if ($user === null) {
+                return back();
+            }
+            if ((auth()->user() !== null) && auth()->user()->getAuthIdentifier() === $user->getAttribute('id')) {
+                return redirect('profile');
+            }
+            return view('user', $this->profileService->displayUser($user));
         } catch (Exception $exception) {
             return $this->errorMessageHelper->redirectErrorMessage($exception);
         }
@@ -77,6 +84,7 @@ class ProfileController extends Controller
     {
         $user = (new UserRepository())->getUserById(auth()->user()->getAuthIdentifier());
         $notifications = $user->notifications->sortBy('read_at');
+        auth()->user()->notifications->markAsRead();
         return view('notifications', compact('notifications'));
     }
 

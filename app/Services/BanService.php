@@ -119,7 +119,7 @@ class BanService
      */
     private function checkUserGotBanned(int $authenticatedUserId, int $userToUnBanId): Follow
     {
-        $userFollowStatus = $this->banRepository->checkPossibleToUnBan($authenticatedUserId, $userToUnBanId);
+        $userFollowStatus = $this->banRepository->getFollowStatusForUnBan($authenticatedUserId, $userToUnBanId);
         if ($userFollowStatus === null) {
             throw new BanException(RedirectMessageEnum::USER_NOT_BANNED);
         }

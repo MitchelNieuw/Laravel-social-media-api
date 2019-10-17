@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Repositories\BanRepository;
 use App\Repositories\FollowRepository;
 use App\Repositories\MessageRepository;
+use App\Repositories\NotificationRepository;
 use App\Repositories\UserRepository;
+use App\User;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
@@ -29,13 +31,23 @@ class ProfileService
     protected $banRepository;
 
     /**
+     * @var NotificationRepository
+     */
+    protected $notificationRepository;
+
+    /**
      * @param FollowRepository $followRepository
      * @param BanRepository $banRepository
+     * @param NotificationRepository $notificationRepository
      */
-    public function __construct(FollowRepository $followRepository, BanRepository $banRepository)
-    {
+    public function __construct(
+        FollowRepository $followRepository,
+        BanRepository $banRepository,
+        NotificationRepository $notificationRepository
+    ) {
         $this->followRepository = $followRepository;
         $this->banRepository = $banRepository;
+        $this->notificationRepository = $notificationRepository;
     }
 
     /**
@@ -51,46 +63,120 @@ class ProfileService
     }
 
     /**
-     * @param string $userTag
-     * @return Factory|RedirectResponse|Redirector|View
+     * @param User $user
+     * @return array
      */
-    public function displayUser(string $userTag)
+    public function displayUser(User $user): array
     {
-        $user = (new UserRepository())->getUserByTagWithMessages($userTag);
-        if ($user === null) {
-            return back();
-        }
         $userId = $user->getAttribute('id');
         $possibleFollow = false;
         $possibleUnFollow = false;
         $possibleBan = false;
         $possibleUnBan = false;
+        $possibleNotificationsOn = false;
+        $possibleNotificationsOff = false;
         if (auth()->user() !== null) {
             $authenticatedUserId = auth()->user()->getAuthIdentifier();
-            if ($authenticatedUserId === $userId) {
-                return redirect('profile');
+            if ($this->followRepository->getFollowRecord($authenticatedUserId, $userId) === null) {
+                $possibleFollow = true;
+                $possibleBan = true;
+                $possibleNotificationsOn = true;
             }
-            $possibleFollow = $this->followRepository->checkPossibleToFollow($authenticatedUserId, $userId);
-            $possibleUnFollow = (
-                $this->followRepository->getFollowStatusForUnFollow($authenticatedUserId, $userId) !== null
-            );
-            $possibleBan = $this->banRepository->checkPossibleToBan($authenticatedUserId, $userId);
-            $possibleUnBan = ($this->banRepository->checkPossibleToUnBan($authenticatedUserId, $userId) !== null);
+            if (!$possibleFollow) {
+                $possibleFollow = $this->getPossibleToFollow($authenticatedUserId, $userId);
+                if (!$possibleFollow) {
+                    $possibleUnFollow = $this->getPossibleToUnFollow($authenticatedUserId, $userId);
+                }
+            }
+            if (!$possibleBan) {
+                $possibleBan = $this->getPossibleToBan($authenticatedUserId, $userId);
+                if (!$possibleBan) {
+                    $possibleUnBan = $this->getPossibleToUnBan($authenticatedUserId, $userId);
+                }
+            }
+            if (!$possibleNotificationsOn) {
+                $possibleNotificationsOn = $this->getPossibleToTurnOnNotifications($authenticatedUserId, $userId);
+                if (!$possibleNotificationsOn) {
+                    $possibleNotificationsOff = $this->getPossibleToTurnOffNotifications($authenticatedUserId, $userId);
+                }
+            }
         }
-        $messages = $user->messages()->paginate(20);
-        $following = $this->followRepository->getFollowingCount($userId);
-        $followers = $this->followRepository->getFollowersCount($userId);
-        return view('user',
-            compact(
-                'user',
-                'messages',
-                'possibleFollow',
-                'possibleUnFollow',
-                'possibleBan',
-                'possibleUnBan',
-                'following',
-                'followers',
-            )
+        return [
+            'user' => $user,
+            'messages' => $user->messages()->paginate(20),
+            'possibleFollow' => $possibleFollow,
+            'possibleUnFollow' => $possibleUnFollow,
+            'possibleBan' => $possibleBan,
+            'possibleUnBan' => $possibleUnBan,
+            'possibleTurnOnNotifications' => $possibleNotificationsOn,
+            'possibleTurnOffNotifications' => $possibleNotificationsOff,
+            'following' => $this->followRepository->getFollowingCount($userId),
+            'followers' => $this->followRepository->getFollowersCount($userId),
+        ];
+    }
+
+    /**
+     * @param int $authenticatedUserId
+     * @param int $userId
+     * @return bool
+     */
+    private function getPossibleToFollow(int $authenticatedUserId, int $userId): bool
+    {
+        return $this->followRepository->checkPossibleToFollow($authenticatedUserId, $userId);
+    }
+
+    /**
+     * @param int $authenticatedUserId
+     * @param int $userId
+     * @return bool
+     */
+    private function getPossibleToUnFollow(int $authenticatedUserId, int $userId): bool
+    {
+        return ($this->followRepository->getFollowStatusForUnFollow($authenticatedUserId, $userId) !== null);
+    }
+
+    /**
+     * @param int $authenticatedUserId
+     * @param int $userId
+     * @return bool
+     */
+    private function getPossibleToBan(int $authenticatedUserId, int $userId): bool
+    {
+        return $this->banRepository->checkPossibleToBan($authenticatedUserId, $userId);
+    }
+
+    /**
+     * @param int $authenticatedUserId
+     * @param int $userId
+     * @return bool
+     */
+    private function getPossibleToUnBan(int $authenticatedUserId, int $userId): bool
+    {
+        return ($this->banRepository->getFollowStatusForUnBan($authenticatedUserId, $userId) !== null);
+    }
+
+    /**
+     * @param int $authenticatedUserId
+     * @param int $userId
+     * @return bool
+     */
+    private function getPossibleToTurnOnNotifications(int $authenticatedUserId, int $userId): bool
+    {
+        return $this->notificationRepository->checkPossibleToTurnOnNotifications(
+            $authenticatedUserId,
+            $userId
+        );
+    }
+
+    /**
+     * @param int $authenticatedUserId
+     * @param int $userId
+     * @return bool
+     */
+    private function getPossibleToTurnOffNotifications(int $authenticatedUserId, int $userId): bool
+    {
+        return (
+            $this->notificationRepository->getFollowStatusForNotificationOff($authenticatedUserId, $userId) !== null
         );
     }
 }

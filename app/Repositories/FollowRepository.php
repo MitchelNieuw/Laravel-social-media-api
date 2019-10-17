@@ -35,11 +35,7 @@ class FollowRepository extends RepositoryBase
      */
     public function checkPossibleToFollow(int $authenticatedUserId, int $followUserId): bool
     {
-        if ($this->getFollowRecord($authenticatedUserId, $followUserId) === null) {
-            return true;
-        }
-        $follow = $this->getFollowStatusForFollow($authenticatedUserId, $followUserId);
-        return ($follow !== null);
+        return ($this->getFollowStatusForFollow($authenticatedUserId, $followUserId) !== null);
     }
 
     /**
