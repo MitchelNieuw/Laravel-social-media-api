@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\RedirectMessageEnum;
+use App\Enums\ResponseMessageEnum;
 use App\Exceptions\MessageException;
 use App\Message;
 use App\Notifications\UserNewMessageNotification;
@@ -102,7 +102,7 @@ class MessageService extends RepositoryBase
         if (($message = $this->messageRepository->findById($messageId)) !== null) {
             return $message;
         }
-        throw new MessageException(RedirectMessageEnum::NO_MESSAGE_FOUND);
+        throw new MessageException(ResponseMessageEnum::NO_MESSAGE_FOUND);
     }
 
     /**

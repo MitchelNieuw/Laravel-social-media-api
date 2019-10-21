@@ -27,7 +27,5 @@
                 <p class="">Since {{ auth()->user()->created_at->format('Y M d') }}</p>
             </div>
         </div>
-        <create-message></create-message>
     </div>
-    <user-messages></user-messages>
 @endsection

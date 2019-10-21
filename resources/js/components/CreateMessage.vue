@@ -15,7 +15,7 @@
 </template>
 
 <script>
-    import { updateBus } from "../event";
+    import { updateBus } from '../event';
     export default {
         name: 'CreateMessage',
         data() {

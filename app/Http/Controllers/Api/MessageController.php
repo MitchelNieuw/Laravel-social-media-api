@@ -6,6 +6,7 @@ use App\Exceptions\MessageException;
 use App\Exceptions\UserException;
 use App\Helpers\ErrorMessageHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MessageResource;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserRepository;
 use App\Services\MessageService;
@@ -41,18 +42,14 @@ class MessageController extends Controller
     }
 
     /**
-     * @return JsonResponse
+     * @return JsonResponse|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function list(): JsonResponse
+    public function list()
     {
         try {
-            $token = request()->bearerToken();
-            $user = (new UserRepository())->getUserByJwtToken($token);
-            if ($user === null) {
-                throw new UserException('User with this token does not exist');
-            }
+            $user = $this->checkUserOfTokenExists();
             $messages = (new MessageRepository())->getAllMessagesByUserId($user->getAttribute('id'));
-            return response()->json($messages);
+            return MessageResource::collection($messages);
         } catch (UserException $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
@@ -60,11 +57,11 @@ class MessageController extends Controller
         }
     }
 
-    /**
+    /**v
      * @param Request $request
-     * @return JsonResponse
+     * @return MessageResource|JsonResponse
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
         try {
             $user = $this->checkUserOfTokenExists();
@@ -73,7 +70,7 @@ class MessageController extends Controller
                 $user->getAttribute('id'),
                 $request->get('content')
             );
-            return response()->json($message);
+            return new MessageResource($message);
         } catch (UserException $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception, $exception->getMessage());
         } catch (Exception $exception) {

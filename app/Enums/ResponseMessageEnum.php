@@ -5,7 +5,7 @@ namespace App\Enums;
 /**
  * @package App\Enums
  */
-class RedirectMessageEnum
+class ResponseMessageEnum
 {
     public const OOPS_SOMETHING_WENT_WRONG = 'Ooops something went wrong!';
     public const NO_MESSAGE_FOUND = 'No message found did not preform delete';

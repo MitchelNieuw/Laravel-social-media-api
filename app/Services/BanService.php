@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\RedirectMessageEnum;
+use App\Enums\ResponseMessageEnum;
 use App\Exceptions\BanException;
 use App\Exceptions\UserException;
 use App\Follow;
@@ -63,7 +63,7 @@ class BanService
         if (!$this->createFollowStatusRecord($userFollowStatus, $authenticatedUserId, $userToBanId, 4)){
             $this->updateFollowRecordUser($userFollowStatus, $authenticatedUserId, '|');
         }
-        return RedirectMessageEnum::BAN_SUCCESSFUL;
+        return ResponseMessageEnum::BAN_SUCCESSFUL;
     }
 
     /**
@@ -80,7 +80,7 @@ class BanService
         $this->checkUserUnBanSelf($authenticatedUserId, $userToUnBanId);
         $userFollowStatus = $this->checkUserGotBanned($authenticatedUserId, $userToUnBanId);
         $this->updateFollowRecordUser($userFollowStatus, $authenticatedUserId, '^');
-        return RedirectMessageEnum::UNBAN_SUCCESSFUL;
+        return ResponseMessageEnum::UNBAN_SUCCESSFUL;
     }
 
     /**
@@ -93,7 +93,7 @@ class BanService
     {
         $userFollowStatus = $this->banRepository->getFollowStatusForBan($authenticatedUserId, $userToBanId);
         if ($userFollowStatus === null) {
-            throw new BanException(RedirectMessageEnum::USER_ALREADY_UNBANNED);
+            throw new BanException(ResponseMessageEnum::USER_ALREADY_UNBANNED);
         }
         return $userFollowStatus;
     }
@@ -121,7 +121,7 @@ class BanService
     {
         $userFollowStatus = $this->banRepository->getFollowStatusForUnBan($authenticatedUserId, $userToUnBanId);
         if ($userFollowStatus === null) {
-            throw new BanException(RedirectMessageEnum::USER_NOT_BANNED);
+            throw new BanException(ResponseMessageEnum::USER_NOT_BANNED);
         }
         return $userFollowStatus;
     }
@@ -134,7 +134,7 @@ class BanService
     private function checkUserBanSelf(int $authenticatedUserId, int $userToBanId): void
     {
         if ($authenticatedUserId === $userToBanId) {
-            throw new BanException(RedirectMessageEnum::BANNING_SELF_NOT_POSSIBLE);
+            throw new BanException(ResponseMessageEnum::BANNING_SELF_NOT_POSSIBLE);
         }
     }
 
@@ -146,7 +146,7 @@ class BanService
     private function checkUserUnBanSelf(int $authenticatedUserId, int $userToBanId): void
     {
         if ($authenticatedUserId === $userToBanId) {
-            throw new BanException(RedirectMessageEnum::UNBANNING_SELF_NOT_POSSIBLE);
+            throw new BanException(ResponseMessageEnum::UNBANNING_SELF_NOT_POSSIBLE);
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\RedirectMessageEnum;
+use App\Enums\ResponseMessageEnum;
 use App\Exceptions\FollowException;
 use App\Exceptions\UserException;
 use App\Follow;
@@ -54,7 +54,7 @@ class FollowService
             $status = $this->getNewStatus($userFollowStatus, $authenticatedUserId, '|', 'follow');
             $this->followRepository->updateFollow($userFollowStatus, $status);
         }
-        return RedirectMessageEnum::FOLLOW_SUCCESSFUL;
+        return ResponseMessageEnum::FOLLOW_SUCCESSFUL;
     }
 
     /**
@@ -73,7 +73,7 @@ class FollowService
             $this->getFollowStatusUnFollow($authenticatedUserId, $userToUnFollowId, $userTag),
             $authenticatedUserId
         );
-        return RedirectMessageEnum::UNFOLLOW_SUCCESSFUL;
+        return ResponseMessageEnum::UNFOLLOW_SUCCESSFUL;
     }
 
     /**
@@ -119,7 +119,7 @@ class FollowService
     {
         $userFollowStatus = $this->followRepository->getFollowStatusForFollow($authenticatedUserId, $userToFollowId);
         if ($userFollowStatus === null) {
-            throw new FollowException(RedirectMessageEnum::FOLLOWING_NOT_POSSIBLE);
+            throw new FollowException(ResponseMessageEnum::FOLLOWING_NOT_POSSIBLE);
         }
         return $userFollowStatus;
     }
@@ -138,7 +138,7 @@ class FollowService
             $userToUnFollowId
         );
         if ($userFollowStatus === null) {
-            throw new FollowException(RedirectMessageEnum::NOT_FOLLOWING_THIS_USER);
+            throw new FollowException(ResponseMessageEnum::NOT_FOLLOWING_THIS_USER);
         }
         return $userFollowStatus;
     }
@@ -151,7 +151,7 @@ class FollowService
     private function checkUserTriesToFollowSelf(int $authenticatedUserId, int $followUserId): void
     {
         if ($authenticatedUserId === $followUserId) {
-            throw new FollowException(RedirectMessageEnum::FOLLOWING_SELF_NOT_POSSIBLE);
+            throw new FollowException(ResponseMessageEnum::FOLLOWING_SELF_NOT_POSSIBLE);
         }
     }
 
@@ -163,7 +163,7 @@ class FollowService
     private function checkUserTriesToUnFollowSelf(int $authenticatedUserId, int $unFollowUserId): void
     {
         if ($authenticatedUserId === $unFollowUserId) {
-            throw new FollowException(RedirectMessageEnum::UNFOLLOWING_SELF_NOT_POSSIBLE);
+            throw new FollowException(ResponseMessageEnum::UNFOLLOWING_SELF_NOT_POSSIBLE);
         }
     }
 }

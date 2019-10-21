@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\ResponseMessageEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -25,20 +26,20 @@ class RefreshTokenIfExpired extends BaseMiddleware
     {
         try {
             JWTAuth::parseToken()->authenticate();
-        } catch (TokenExpiredException $e) {
+        } catch (TokenExpiredException $exception) {
             $token = JWTAuth::refresh(JWTAuth::getToken());
             $user = JWTAuth::setToken($token)->toUser();
             $user->update(['jwt_token' => $token]);
             return $next($request);
-        } catch (TokenBlacklistedException $e) {
-            Log::critical($e->getMessage());
+        } catch (TokenBlacklistedException $exception) {
+            Log::critical($exception->getMessage());
             return response()->json(['message' => 'Token blacklisted']);
-        } catch (TokenInvalidException $e) {
-            Log::critical($e->getMessage());
+        } catch (TokenInvalidException $exception) {
+            Log::critical($exception->getMessage());
             return response()->json(['message' => 'Token invalid']);
-        } catch (JWTException $e) {
-            Log::critical($e->getMessage());
-            return response()->json(['message' => 'Something went wrong']);
+        } catch (JWTException $exception) {
+            Log::critical($exception->getMessage());
+            return response()->json(['message' => ResponseMessageEnum::OOPS_SOMETHING_WENT_WRONG]);
         }
         return $next($request);
     }
