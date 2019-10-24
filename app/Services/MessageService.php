@@ -58,7 +58,7 @@ class MessageService extends RepositoryBase
     public function deleteMessage(int $messageId, int $authenticatedUserId): void
     {
         $message = $this->checkMessageExists($messageId);
-        if ((int)$message->user_id !== $authenticatedUserId) {
+        if ($message->user_id !== $authenticatedUserId) {
             throw new MessageException('This is not your message');
         }
         $this->messageRepository->delete($message);
@@ -99,10 +99,11 @@ class MessageService extends RepositoryBase
      */
     private function checkMessageExists(int $messageId): Message
     {
-        if (($message = $this->messageRepository->findById($messageId)) !== null) {
-            return $message;
+        $message = $this->messageRepository->findById($messageId);
+        if ($message === null) {
+            throw new MessageException(ResponseMessageEnum::NO_MESSAGE_FOUND);
         }
-        throw new MessageException(ResponseMessageEnum::NO_MESSAGE_FOUND);
+        return $message;
     }
 
     /**

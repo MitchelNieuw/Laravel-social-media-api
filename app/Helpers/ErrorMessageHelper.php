@@ -25,16 +25,20 @@ class ErrorMessageHelper
 
     /**
      * @param Exception $exception
+     * @param int $code
      * @param string $message
      * @return JsonResponse
      */
     public function jsonErrorMessage(
         Exception $exception,
+        int $code = 500,
         string $message = ResponseMessageEnum::OOPS_SOMETHING_WENT_WRONG
     ): JsonResponse {
-        Log::critical($exception->getMessage());
+        if ($message === ResponseMessageEnum::OOPS_SOMETHING_WENT_WRONG) {
+            Log::critical($exception->getMessage());
+        }
         return response()->json([
             'message' => $message,
-        ], 404);
+        ], $code);
     }
 }

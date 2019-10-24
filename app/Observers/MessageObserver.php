@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * @package App\Observers
  */
-class NewMessageObserver
+class MessageObserver
 {
     /**
      * @param Message $message

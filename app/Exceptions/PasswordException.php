@@ -12,5 +12,5 @@ class PasswordException extends Exception
     /**
      * @var int
      */
-    protected $code = 404;
+    protected $code = 400;
 }

@@ -44,9 +44,9 @@ class MessageRepository extends RepositoryBase
 
     /**
      * @param int $id
-     * @return Message
+     * @return Message|null
      */
-    public function findById(int $id): Message
+    public function findById(int $id): ?Message
     {
         return Message::find($id);
     }

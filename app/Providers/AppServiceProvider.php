@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Message;
-use App\Observers\NewMessageObserver;
+use App\Observers\MessageObserver;
+use App\Observers\UserObserver;
+use App\User;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Message::observe(NewMessageObserver::class);
+        Message::observe(MessageObserver::class);
+        User::observe(UserObserver::class);
     }
 }
