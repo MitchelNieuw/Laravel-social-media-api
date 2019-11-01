@@ -2,10 +2,8 @@
 
 namespace App\Services;
 
-use App\Enums\FollowEnum;
 use App\Exceptions\NotificationException;
 use App\Exceptions\UserException;
-use App\Follow;
 use App\Repositories\NotificationRepository;
 
 /**
@@ -17,13 +15,13 @@ class NotificationService
 
     /**
      * @param string $userTag
+     * @param int $authenticatedUserId
      * @return string
      * @throws NotificationException
      * @throws UserException
      */
-    public function turnOnNotifications(string $userTag): string
+    public function turnOnNotifications(string $userTag, int $authenticatedUserId): string
     {
-        $authenticatedUserId = auth()->user()->getAuthIdentifier();
         $followUser = $this->checkUserExists($userTag);
         $followUserId = $followUser->getAttribute('id');
         $userFollowStatus = $this->getFollowStatusNotificationOnPossible($authenticatedUserId, $followUserId);
@@ -33,18 +31,18 @@ class NotificationService
                 $this->getNewStatus($userFollowStatus, $authenticatedUserId, '|', 'notification')
             );
         }
-        return '';
+        return 'Notifications are turned on';
     }
 
     /**
      * @param string $userTag
+     * @param int $authenticatedUserId
      * @return string
      * @throws NotificationException
      * @throws UserException
      */
-    public function turnOffNotifications(string $userTag): string
+    public function turnOffNotifications(string $userTag, int $authenticatedUserId): string
     {
-        $authenticatedUserId = auth()->user()->getAuthIdentifier();
         $followUser = $this->checkUserExists($userTag);
         $followUserId = $followUser->getAttribute('id');
         $userFollowStatus = $this->getFollowStatusNotificationOffPossible($authenticatedUserId, $followUserId);
@@ -54,7 +52,7 @@ class NotificationService
                 $this->getNewStatus($userFollowStatus, $authenticatedUserId, '^', 'notification')
             );
         }
-        return '';
+        return 'Notifications are turned off';
     }
 
     /**
@@ -83,7 +81,7 @@ class NotificationService
      */
     private function getFollowStatusNotificationOffPossible(int $authenticatedUserId, int $followUserId)
     {
-        $userFollowStatus = (new NotificationRepository())->getFollowStatusForNotificationOff(
+        $userFollowStatus = (new NotificationRepository())->checkNotificationsAreTurnedOnForAuthenticatedUser(
             $authenticatedUserId,
             $followUserId
         );

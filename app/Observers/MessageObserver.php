@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Message;
 use App\Notifications\UserNewMessageNotification;
 use App\Notifications\UserTaggedInMessage;
+use App\Reaction;
 use App\Repositories\NotificationRepository;
 use App\Repositories\UserRepository;
 use App\User;
@@ -30,6 +31,7 @@ class MessageObserver
     public function deleted(Message $message): void
     {
         DB::table('notifications')->where('data', 'like', '%\"messageId\":'.$message->id.'%' )->delete();
+        Reaction::where('message_id', $message->getAttribute('id'))->delete();
     }
 
     /**
@@ -110,7 +112,7 @@ class MessageObserver
     private function notifyUsersWhenNotTagged(Message $message, array $allTaggedUserIds): void
     {
         $users = (new UserRepository())->getUsersByIds($this->getUserIdsForNotifications($message->user->id));
-        if (!$users->isEmpty()) {
+        if ($users->isNotEmpty()) {
             foreach ($users as $user) {
                 if (!in_array((int)$user->getAttribute('id'), $allTaggedUserIds, true)) {
                     $user->notify(new UserNewMessageNotification($message->user->tag, $message->id));

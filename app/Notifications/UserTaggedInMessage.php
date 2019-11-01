@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Message;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -51,7 +50,10 @@ class UserTaggedInMessage extends Notification
             'notification_id' => $this->id,
             'messageId' => $this->message->getAttribute('id'),
             'message' => '@' . $this->userTag . ' tagged you in a new message',
-            'link' => url('/user') . '/' . $this->userTag . '/message/' . $this->message->getAttribute('id'),
+            'link' => env('NOTIFICATION_MESSAGE_URL') .
+                $this->userTag .
+                '/message/' .
+                $this->message->getAttribute('id'),
         ];
     }
 }

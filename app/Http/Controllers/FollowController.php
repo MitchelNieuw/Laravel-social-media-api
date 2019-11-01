@@ -61,7 +61,7 @@ class FollowController extends Controller
     public function follow(string $userTag): RedirectResponse
     {
         try {
-            $message = $this->followService->follow($userTag);
+            $message = $this->followService->follow($userTag, auth()->user()->getAuthIdentifier());
             return back()->with(['message' => $message]);
         } catch (FollowException | UserException $exception) {
             return back()->withErrors($exception->getMessage());
@@ -77,7 +77,7 @@ class FollowController extends Controller
     public function unFollow(string $userTag): RedirectResponse
     {
         try {
-            $message = $this->followService->unFollow($userTag);
+            $message = $this->followService->unFollow($userTag, auth()->user()->getAuthIdentifier());
             return back()->with(['message' => $message]);
         } catch (FollowException | UserException $exception) {
             return back()->withErrors($exception->getMessage());

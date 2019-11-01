@@ -40,7 +40,7 @@ class NotificationController extends Controller
     public function turnOnNotifications(string $userTag): ?RedirectResponse
     {
         try {
-            $this->notificationService->turnOnNotifications($userTag);
+            $this->notificationService->turnOnNotifications($userTag, auth()->user()->getAuthIdentifier());
             return back();
         } catch (UserException | NotificationException $exception) {
             return back()->withErrors($exception->getMessage());
@@ -56,7 +56,7 @@ class NotificationController extends Controller
     public function turnOffNotifications(string $userTag): ?RedirectResponse
     {
         try {
-            $this->notificationService->turnOffNotifications($userTag);
+            $this->notificationService->turnOffNotifications($userTag, auth()->user()->getAuthIdentifier());
             return back();
         } catch (UserException | NotificationException $exception) {
             return back()->withErrors($exception->getMessage());

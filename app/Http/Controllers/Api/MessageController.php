@@ -14,7 +14,6 @@ use App\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * @package App\Http\Controllers\Api
@@ -49,7 +48,7 @@ class MessageController extends Controller
     {
         try {
             $user = $this->checkUserOfTokenExists($request);
-            $messages = (new MessageRepository())->getAllMessagesByUserId($user->getAttribute('id'));
+            $messages = (new MessageRepository())->getMessagesByUserId($user->getAttribute('id'));
             return MessageResource::collection($messages);
         } catch (UserException $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception, 400, $exception->getMessage());
@@ -68,8 +67,7 @@ class MessageController extends Controller
             $user = $this->checkUserOfTokenExists($request);
             $message = $this->messageService->storeMessage(
                 $request,
-                $user->getAttribute('id'),
-                $request->get('content')
+                $user
             );
             return new MessageResource($message);
         } catch (UserException $exception) {

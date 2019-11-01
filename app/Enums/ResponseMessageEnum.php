@@ -17,6 +17,7 @@ class ResponseMessageEnum
     public const NOT_FOLLOWING_THIS_USER = 'You\'re  not following this user';
     public const FOLLOWING_SELF_NOT_POSSIBLE = 'Following yourself is not possible';
     public const UNFOLLOWING_SELF_NOT_POSSIBLE = 'Unfollowing yourself is not possible';
+    public const REACTION_DELETED_SUCCESSFUL = 'Reaction deleted successful';
 
 
     public const BAN_SUCCESSFUL = 'Ban successful';

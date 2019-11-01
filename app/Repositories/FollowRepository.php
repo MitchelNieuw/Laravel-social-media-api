@@ -100,7 +100,7 @@ class FollowRepository extends RepositoryBase
      * @param int $userId
      * @return Collection
      */
-    public function getFollowersWithRelationsByUserId(int $userId): Collection
+    public function getFollowersWithRelationships(int $userId): Collection
     {
         return $this->getFollowers($userId)
             ->with('user:id,name,tag,profilePicture', 'following:id,name,tag,profilePicture')
@@ -128,7 +128,7 @@ class FollowRepository extends RepositoryBase
      * @param int $userId
      * @return mixed
      */
-    private function getFollowers(int $userId)
+    public function getFollowers(int $userId)
     {
         return Follow::where('user_id', $userId)
             ->whereRaw('status&2=2')

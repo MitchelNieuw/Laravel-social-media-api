@@ -51,7 +51,7 @@ class AuthenticationController extends Controller
         } catch (ValidationException | UserException | PasswordException $exception) {
             return $this->errorMessageHelper->jsonErrorMessage(
                 $exception,
-                $exception->getCode(),
+                404,
                 $exception->getMessage()
             );
         } catch (Exception $exception) {

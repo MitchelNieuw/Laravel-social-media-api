@@ -16,7 +16,8 @@
                 <a class="navbar-brand" href="{{ url('/') }}">
                     {{ config('app.name', 'Laravel') }}
                 </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -41,23 +42,23 @@
                                    aria-haspopup="true" aria-expanded="true" v-pre>
                                     Notifications <span class="caret"></span>
                                 </a>
-                                <ul class="dropdown-menu" aria-labelledby="notificationsMenu" id="notificationsMenu">
-                                    @php($notifications = auth()->user()->notifications()->limit(5)->get())
-                                    @if(count($notifications) > 0)
-                                        @foreach($notifications as $notification)
-                                            <li class="dropdown-header border-bottom">
-                                                <p>{{ $notification->data['message'] }}</p>
-                                                <a href="{{ $notification->data['link'] }}"
-                                                >{{ $notification->data['link'] }}</a>
-                                                <form action="/notifications/{{ $notification->data['notification_id'] }}/delete"
-                                                      method="post">
-                                                    @method('delete')
-                                                    <button class="btn btn-danger" type="submit">Delete</button>
-                                                </form>
-                                            </li>
-                                        @endforeach
-                                    @endif
-                                </ul>
+{{--                                <ul class="dropdown-menu" aria-labelledby="notificationsMenu" id="notificationsMenu">--}}
+{{--                                    @php($notifications = auth()->user()->notifications()->limit(5)->get())--}}
+{{--                                    @if(count($notifications) > 0)--}}
+{{--                                        @foreach($notifications as $notification)--}}
+{{--                                            <li class="dropdown-header border-bottom">--}}
+{{--                                                <p>{{ $notification->data['message'] }}</p>--}}
+{{--                                                <a href="{{ $notification->data['link'] }}"--}}
+{{--                                                >{{ $notification->data['link'] }}</a>--}}
+{{--                                                <form action="/notifications/{{ $notification->data['notification_id'] }}/delete"--}}
+{{--                                                      method="post">--}}
+{{--                                                    @method('delete')--}}
+{{--                                                    <button class="btn btn-danger" type="submit">Delete</button>--}}
+{{--                                                </form>--}}
+{{--                                            </li>--}}
+{{--                                        @endforeach--}}
+{{--                                    @endif--}}
+{{--                                </ul>--}}
                             </li>
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"

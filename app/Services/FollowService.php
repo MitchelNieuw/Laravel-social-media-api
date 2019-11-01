@@ -39,13 +39,13 @@ class FollowService
 
     /**
      * @param string $userTag
+     * @param int $authenticatedUserId
      * @return string
      * @throws FollowException
      * @throws UserException
      */
-    public function follow(string $userTag): string
+    public function follow(string $userTag, int $authenticatedUserId): string
     {
-        $authenticatedUserId = auth()->user()->getAuthIdentifier();
         $userToFollow = $this->checkUserExists($userTag);
         $userToFollowId = $userToFollow->getAttribute('id');
         $this->checkUserTriesToFollowSelf($authenticatedUserId, $userToFollowId);
@@ -59,13 +59,13 @@ class FollowService
 
     /**
      * @param string $userTag
+     * @param int $authenticatedUserId
      * @return string
      * @throws FollowException
      * @throws UserException
      */
-    public function unFollow(string $userTag): string
+    public function unFollow(string $userTag, int $authenticatedUserId): string
     {
-        $authenticatedUserId = auth()->user()->getAuthIdentifier();
         $userToUnFollow = $this->checkUserExists($userTag);
         $userToUnFollowId = $userToUnFollow->getAttribute('id');
         $this->checkUserTriesToUnFollowSelf($authenticatedUserId, $userToUnFollowId);
@@ -95,7 +95,7 @@ class FollowService
     public function getAllFollowers(string $userTag): Collection
     {
         $user = $this->checkUserExists($userTag);
-        $followers = $this->followRepository->getFollowersWithRelationsByUserId($user->getAttribute('id'));
+        $followers = $this->followRepository->getFollowersWithRelationships($user->getAttribute('id'));
         return $followers;
     }
 

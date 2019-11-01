@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Repositories\FollowRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,10 +21,12 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'tag' => '@'.$this->tag,
-            'profilePicture' => url('') . '/profilePictures/' . $this->profilePicture,
+            'tag' => $this->tag,
+            'profilePicture' => $this->profilePicture,
             'jwtToken' => $this->jwt_token,
             'createdAt' => $this->created_at,
+            'followerCount' => (new FollowRepository())->getFollowersCount($this->id),
+            'followingCount' => (new FollowRepository())->getFollowingCount($this->id),
         ];
     }
 }

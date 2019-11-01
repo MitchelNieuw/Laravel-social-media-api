@@ -5,16 +5,13 @@ namespace App\Services;
 use App\Enums\ResponseMessageEnum;
 use App\Exceptions\MessageException;
 use App\Message;
-use App\Notifications\UserNewMessageNotification;
 use App\Repositories\MessageRepository;
 use App\Repositories\NotificationRepository;
 use App\Repositories\RepositoryBase;
 use App\Repositories\UserRepository;
+use App\User;
 use Exception;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * @package App\Services
@@ -36,16 +33,15 @@ class MessageService extends RepositoryBase
 
     /**
      * @param Request $request
-     * @param int $userId
-     * @param string $messageContent
+     * @param User $user
      * @return Message
      * @throws MessageException
      */
-    public function storeMessage(Request $request, int $userId, string $messageContent): Message
+    public function storeMessage(Request $request, User $user): Message
     {
         $this->validateRequest($request);
-        $message = $this->saveMessage($userId, $messageContent);
-        $this->sendNotifications($userId);
+        $fileName = $this->storeImage($request, $user);
+        $message = $this->saveMessage($user->getAttribute('id'), $request->get('content'), $fileName);
         return $message;
     }
 
@@ -58,8 +54,18 @@ class MessageService extends RepositoryBase
     public function deleteMessage(int $messageId, int $authenticatedUserId): void
     {
         $message = $this->checkMessageExists($messageId);
-        if ($message->user_id !== $authenticatedUserId) {
+        if ($message->getAttribute('user_id') !== $authenticatedUserId) {
             throw new MessageException('This is not your message');
+        }
+        $authenticatedUser = (new UserRepository())->getUserById($authenticatedUserId);
+        if ($authenticatedUser !== null && $message->getAttribute('image') !== null) {
+            unlink(
+                public_path() .
+                '/messageImages/' .
+                $authenticatedUser->getAttribute('tag') .
+                '/' .
+                $message->getAttribute('image')
+            );
         }
         $this->messageRepository->delete($message);
     }
@@ -70,8 +76,9 @@ class MessageService extends RepositoryBase
      */
     private function validateRequest(Request $request): void
     {
-        $validator = validator($request->all(), [
+        $validator = validator()->make($request->all(), [
             'content' => 'required|string|max:500',
+            'image' => 'sometimes|image|mimes:jpeg,jpg,png|max:2048',
         ]);
         if ($validator->fails()) {
             throw new MessageException($validator->getMessageBag()->first());
@@ -79,13 +86,32 @@ class MessageService extends RepositoryBase
     }
 
     /**
+     * @param Request $request
+     * @param User $user
+     * @return string|void
+     */
+    private function storeImage(Request $request, User $user)
+    {
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $fileOriginalName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('messageImages') . '/' . $user->getAttribute('tag') . '/', $fileOriginalName);
+            return $fileOriginalName;
+        }
+    }
+
+    /**
      * @param int $userId
      * @param string $messageContent
+     * @param null $fileName
      * @return Message
      */
-    private function saveMessage(int $userId, string $messageContent): Message
+    private function saveMessage(int $userId, string $messageContent, $fileName = null): Message
     {
         $message = new Message();
+        if ($fileName !== null) {
+            $message->setAttribute('image', $fileName);
+        }
         $message->setAttribute('user_id', $userId);
         $message->setAttribute('content', $messageContent);
         $message->save();
@@ -104,27 +130,5 @@ class MessageService extends RepositoryBase
             throw new MessageException(ResponseMessageEnum::NO_MESSAGE_FOUND);
         }
         return $message;
-    }
-
-    /**
-     * @param int $authenticatedUserId
-     */
-    private function sendNotifications(int $authenticatedUserId): void
-    {
-        (new UserRepository())->getUsersByIds(
-            $this->getUserIdsForNotifications($authenticatedUserId)
-        );
-    }
-
-    /**
-     * @param int $authenticatedUserId
-     * @return array
-     */
-    private function getUserIdsForNotifications(int $authenticatedUserId): array
-    {
-        return $this->removeStatusAndAuthenticatedUserIdFromArray(
-            (new NotificationRepository())->getUserIdsWhereNotificationsArePossible($authenticatedUserId),
-            $authenticatedUserId
-        );
     }
 }

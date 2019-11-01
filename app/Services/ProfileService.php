@@ -56,7 +56,7 @@ class ProfileService
     public function displayProfile(): View
     {
         $userId = auth()->user()->getAuthIdentifier();
-        $messages = (new MessageRepository())->getAllMessagesByUserId($userId);
+        $messages = (new MessageRepository())->getMessagesByUserId($userId);
         $followingCount = $this->followRepository->getFollowingCount($userId);
         $followersCount = $this->followRepository->getFollowersCount($userId);
         return view('profile', compact('messages', 'followingCount', 'followersCount'));
@@ -69,14 +69,39 @@ class ProfileService
     public function displayUser(User $user): array
     {
         $userId = $user->getAttribute('id');
+        $authenticatedUserId = null;
+        if (auth()->user() !== null) {
+            $authenticatedUserId = auth()->user()->getAuthIdentifier();
+        }
+        $arrayStatus = $this->getStatusBetweenUsers($authenticatedUserId, $userId);
+        return [
+            'user' => $user,
+            'messages' => $user->messages()->paginate(20),
+            'possibleFollow' => $arrayStatus['possibleToFollow'],
+            'possibleUnFollow' => $arrayStatus['possibleToUnFollow'],
+            'possibleBan' => $arrayStatus['possibleToBan'],
+            'possibleUnBan' => $arrayStatus['possibleToUnBan'],
+            'possibleTurnOnNotifications' => $arrayStatus['possibleTurnOnNotifications'],
+            'possibleTurnOffNotifications' => $arrayStatus['possibleTurnOffNotifications'],
+            'following' => $this->followRepository->getFollowingCount($userId),
+            'followers' => $this->followRepository->getFollowersCount($userId),
+        ];
+    }
+
+    /**
+     * @param int $authenticatedUserId
+     * @param int $userId
+     * @return array
+     */
+    public function getStatusBetweenUsers(int $authenticatedUserId, int $userId): array
+    {
         $possibleFollow = false;
         $possibleUnFollow = false;
         $possibleBan = false;
         $possibleUnBan = false;
         $possibleNotificationsOn = false;
         $possibleNotificationsOff = false;
-        if (auth()->user() !== null) {
-            $authenticatedUserId = auth()->user()->getAuthIdentifier();
+        if ($authenticatedUserId !== null) {
             if ($this->followRepository->getFollowRecord($authenticatedUserId, $userId) === null) {
                 $possibleFollow = true;
                 $possibleBan = true;
@@ -102,16 +127,12 @@ class ProfileService
             }
         }
         return [
-            'user' => $user,
-            'messages' => $user->messages()->paginate(20),
-            'possibleFollow' => $possibleFollow,
-            'possibleUnFollow' => $possibleUnFollow,
-            'possibleBan' => $possibleBan,
-            'possibleUnBan' => $possibleUnBan,
+            'possibleToFollow' => $possibleFollow,
+            'possibleToUnFollow' => $possibleUnFollow,
+            'possibleToBan' => $possibleBan,
+            'possibleToUnBan' => $possibleUnBan,
             'possibleTurnOnNotifications' => $possibleNotificationsOn,
             'possibleTurnOffNotifications' => $possibleNotificationsOff,
-            'following' => $this->followRepository->getFollowingCount($userId),
-            'followers' => $this->followRepository->getFollowersCount($userId),
         ];
     }
 
@@ -176,7 +197,7 @@ class ProfileService
     private function getPossibleToTurnOffNotifications(int $authenticatedUserId, int $userId): bool
     {
         return (
-            $this->notificationRepository->getFollowStatusForNotificationOff($authenticatedUserId, $userId) !== null
+            $this->notificationRepository->checkNotificationsAreTurnedOnForAuthenticatedUser($authenticatedUserId, $userId) !== null
         );
     }
 }

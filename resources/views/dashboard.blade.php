@@ -19,7 +19,4 @@
             </div>
         </div>
     @endforeach
-    <div class="mx-auto">
-        {{ $messages->links() }}
-    </div>
 @endsection

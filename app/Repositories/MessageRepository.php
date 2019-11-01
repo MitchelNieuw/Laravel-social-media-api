@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Message;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @package App\Repositories
@@ -11,36 +12,33 @@ use Exception;
 class MessageRepository extends RepositoryBase
 {
     /**
-     * @param int $id
-     * @return Message|null
-     */
-    public function getMessageById(int $id): ?Message
-    {
-        return Message::find($id);
-    }
-
-    /**
      * @param int $userId
-     * @return mixed
+     * @return Collection
      */
-    public function getMessagesFromFollowingUsers(int $userId)
+    public function getMessagesFromFollowingUsers(int $userId): Collection
     {
         $userIds = $this->removeStatusAndAuthenticatedUserIdFromArray(
             (new FollowRepository())->getUserIdsOfFollowingUsers($userId),
             $userId
         );
-        return Message::with('user:id,name,tag,profilePicture')->whereIn('user_id', $userIds)
-            ->orderByDesc('created_at')->paginate(40);
+        return Message::with('user:id,name,tag,profilePicture', 'reactions', 'reactions.user')
+            ->whereIn('user_id', $userIds)
+            ->orderByDesc('created_at')
+            ->get();
     }
 
     /**
      * @param int $userId
-     * @return mixed
+     * @return Collection|null
      */
-    public function getAllMessagesByUserId(int $userId)
+    public function getMessagesByUserId(int $userId): ?Collection
     {
-        return Message::where('user_id', $userId)->orderBy('created_at', 'DESC')->paginate(40);
+        return Message::where('user_id', $userId)
+            ->with('reactions', 'reactions.user')
+            ->orderBy('created_at', 'DESC')
+            ->get();
     }
+
 
     /**
      * @param int $id

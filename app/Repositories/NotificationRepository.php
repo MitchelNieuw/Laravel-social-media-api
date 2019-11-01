@@ -34,7 +34,7 @@ class NotificationRepository extends RepositoryBase
      * @param int $followUserId
      * @return Follow|null
      */
-    public function getFollowStatusForNotificationOff(int $authenticatedUserId, int $followUserId): ?Follow
+    public function checkNotificationsAreTurnedOnForAuthenticatedUser(int $authenticatedUserId, int $followUserId): ?Follow
     {
         return Follow::where('user_id', $authenticatedUserId)
             ->where('follow_user_id', $followUserId)
@@ -50,6 +50,7 @@ class NotificationRepository extends RepositoryBase
             })
             ->first();
     }
+
 
     /**
      * @param int $authenticatedUserId

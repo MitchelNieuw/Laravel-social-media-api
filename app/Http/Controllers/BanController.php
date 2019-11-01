@@ -41,7 +41,7 @@ class BanController extends Controller
     public function ban(string $userTag): RedirectResponse
     {
         try {
-            $message = $this->banService->banUserByTag($userTag);
+            $message = $this->banService->banUserByTag($userTag, auth()->user()->getAuthIdentifier());
             return back()->with(['message' => $message]);
         } catch (BanException | UserException $exception) {
             return back()->withErrors($exception->getMessage());
@@ -57,7 +57,7 @@ class BanController extends Controller
     public function unBan(string $userTag): RedirectResponse
     {
         try {
-            $message = $this->banService->unBanByUserTag($userTag);
+            $message = $this->banService->unBanByUserTag($userTag, auth()->user()->getAuthIdentifier());
             return back()->with(['message' => $message]);
         } catch (BanException | UserException $exception) {
             return back()->withErrors($exception->getMessage());

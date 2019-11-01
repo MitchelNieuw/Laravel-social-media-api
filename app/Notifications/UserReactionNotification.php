@@ -8,7 +8,7 @@ use Illuminate\Notifications\Notification;
 /**
  * @package App\Notifications
  */
-class UserNewMessageNotification extends Notification
+class UserReactionNotification extends Notification
 {
     use Queueable;
 
@@ -50,7 +50,7 @@ class UserNewMessageNotification extends Notification
         return [
             'notification_id' => $this->id,
             'messageId' => $this->messageId,
-            'message' => '@' . $this->userTag . ' placed a new message',
+            'message' => '@' . $this->userTag . ' gave a reaction on your message',
             'link' => env('NOTIFICATION_MESSAGE_URL') . $this->userTag . '/message/' . $this->messageId,
         ];
     }

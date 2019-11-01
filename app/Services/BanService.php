@@ -49,13 +49,13 @@ class BanService
 
     /**
      * @param string $userTag
+     * @param int $authenticatedUserId
      * @return string
      * @throws BanException
      * @throws UserException
      */
-    public function banUserByTag(string $userTag): string
+    public function banUserByTag(string $userTag, int $authenticatedUserId): string
     {
-        $authenticatedUserId = auth()->user()->getAuthIdentifier();
         $userToBan = $this->checkUserExists($userTag);
         $userToBanId = $userToBan->getAttribute('id');
         $this->checkUserBanSelf($authenticatedUserId, $userToBanId);
@@ -68,13 +68,13 @@ class BanService
 
     /**
      * @param string $userTag
+     * @param int $authenticatedUserId
      * @return string
      * @throws BanException
      * @throws UserException
      */
-    public function unBanByUserTag(string $userTag): string
+    public function unBanByUserTag(string $userTag, int $authenticatedUserId): string
     {
-        $authenticatedUserId = auth()->user()->getAuthIdentifier();
         $userToUnBan = $this->checkUserExists($userTag);
         $userToUnBanId = $userToUnBan->getAttribute('id');
         $this->checkUserUnBanSelf($authenticatedUserId, $userToUnBanId);

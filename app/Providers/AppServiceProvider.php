@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Message;
 use App\Observers\MessageObserver;
+use App\Observers\ReactionObserver;
 use App\Observers\UserObserver;
+use App\Reaction;
 use App\User;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,5 +31,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Message::observe(MessageObserver::class);
         User::observe(UserObserver::class);
+        Reaction::observe(ReactionObserver::class);
     }
 }
