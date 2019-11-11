@@ -19,26 +19,47 @@ class ErrorMessageHelper
      */
     public function redirectErrorMessage(Exception $exception): RedirectResponse
     {
-        Log::critical($exception->getMessage());
+        Log::critical(json_encode($this->prepareErrorMessage($exception), JSON_THROW_ON_ERROR, 512));
         return back()->withErrors(ResponseMessageEnum::OOPS_SOMETHING_WENT_WRONG);
     }
 
     /**
      * @param Exception $exception
-     * @param int $code
-     * @param string $message
      * @return JsonResponse
      */
     public function jsonErrorMessage(
-        Exception $exception,
-        int $code = 500,
-        string $message = ResponseMessageEnum::OOPS_SOMETHING_WENT_WRONG
+        Exception $exception
     ): JsonResponse {
-        if ($message === ResponseMessageEnum::OOPS_SOMETHING_WENT_WRONG) {
-            Log::critical($exception->getMessage());
+        if ($exception->getCode() === 500) {
+            Log::critical(json_encode($this->prepareInternalServerError($exception), JSON_THROW_ON_ERROR, 512));
         }
-        return response()->json([
-            'message' => $message,
-        ], $code);
+        return response()->json($this->prepareErrorMessage($exception));
+    }
+
+    /**
+     * @param Exception $exception
+     * @return array
+     */
+    public function prepareErrorMessage(Exception $exception): array
+    {
+        return [
+            'code' => $exception->getCode(),
+            'message' => $exception->getMessage(),
+        ];
+    }
+
+    /**
+     * @param Exception $exception
+     * @return array
+     */
+    public function prepareInternalServerError(Exception $exception)
+    {
+        return [
+            'code' => $exception->getCode(),
+            'message' => $exception->getMessage(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+            'trace' => $exception->getTrace(),
+        ];
     }
 }

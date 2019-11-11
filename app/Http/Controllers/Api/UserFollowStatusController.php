@@ -74,11 +74,7 @@ class UserFollowStatusController extends Controller
                 'message' => $message,
             ]);
         } catch (FollowException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
@@ -98,11 +94,7 @@ class UserFollowStatusController extends Controller
                 'message' => $message,
             ]);
         } catch (FollowException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
@@ -122,11 +114,7 @@ class UserFollowStatusController extends Controller
                 'message' => $message,
             ]);
         } catch (BanException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
@@ -146,11 +134,7 @@ class UserFollowStatusController extends Controller
                 'message' => $message,
             ]);
         } catch (BanException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
@@ -170,11 +154,7 @@ class UserFollowStatusController extends Controller
                 'message' => $message,
             ]);
         } catch (NotificationException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
@@ -194,11 +174,7 @@ class UserFollowStatusController extends Controller
                 'message' => $message,
             ]);
         } catch (NotificationException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }

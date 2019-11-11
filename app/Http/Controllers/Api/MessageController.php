@@ -51,7 +51,7 @@ class MessageController extends Controller
             $messages = (new MessageRepository())->getMessagesByUserId($user->getAttribute('id'));
             return MessageResource::collection($messages);
         } catch (UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception, 400, $exception->getMessage());
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
@@ -65,17 +65,10 @@ class MessageController extends Controller
     {
         try {
             $user = $this->checkUserOfTokenExists($request);
-            $message = $this->messageService->storeMessage(
-                $request,
-                $user
-            );
+            $message = $this->messageService->storeMessage($request, $user);
             return new MessageResource($message);
         } catch (UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
@@ -93,11 +86,7 @@ class MessageController extends Controller
             $this->messageService->deleteMessage($messageId, $authenticatedUser->getAttribute('id'));
             return response()->json(['message' => 'Delete successful!',]);
         } catch (MessageException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }

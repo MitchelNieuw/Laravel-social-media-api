@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\NotificationException;
 use App\Exceptions\UserException;
 use App\Helpers\ErrorMessageHelper;
 use App\Http\Controllers\Controller;
@@ -41,11 +40,7 @@ class NotificationController extends Controller
             $user = $this->checkUserOfTokenExists($request);
             return NotificationResource::collection($user->notifications()->get());
         } catch (UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }

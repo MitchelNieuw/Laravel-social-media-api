@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Exceptions\UserException;
 use App\Helpers\ErrorMessageHelper;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\DashboardResource;
 use App\Http\Resources\DisplayUserResource;
 use App\Repositories\FollowRepository;
-use App\Repositories\MessageRepository;
 use App\Repositories\UserRepository;
 use App\User;
 use Exception;
@@ -55,11 +53,7 @@ class ProfileController extends Controller
             }
             return new DisplayUserResource($user, $authenticatedUser->getAttribute('id'));
         } catch (UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
@@ -81,11 +75,7 @@ class ProfileController extends Controller
             $followers = $this->followRepository->getFollowersWithRelationships($user->getAttribute('id'));
             return response()->json(['followers' => $followers,]);
         } catch (UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return  $this->errorMessageHelper->jsonErrorMessage($exception);
         }
@@ -107,11 +97,7 @@ class ProfileController extends Controller
             $following = $this->followRepository->getFollowingUsersWithRelationships($user->getAttribute('id'));
             return response()->json(['following' => $following,]);
         } catch (UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }

@@ -41,11 +41,7 @@ class MessageController extends Controller
     public function store(Request $request): RedirectResponse
     {
         try {
-            $this->messageService->storeMessage(
-                $request,
-                auth()->user()->getAuthIdentifier(),
-                $request->get('content')
-            );
+            $this->messageService->storeMessage($request, auth()->user()->getAuthIdentifier());
             return back();
         } catch (MessageException $exception) {
             return back()->withErrors($exception->getMessage());

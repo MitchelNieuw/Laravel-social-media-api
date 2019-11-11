@@ -6,7 +6,6 @@ use App\Enums\ResponseMessageEnum;
 use App\Exceptions\MessageException;
 use App\Message;
 use App\Repositories\MessageRepository;
-use App\Repositories\NotificationRepository;
 use App\Repositories\RepositoryBase;
 use App\Repositories\UserRepository;
 use App\User;

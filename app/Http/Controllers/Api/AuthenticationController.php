@@ -49,11 +49,7 @@ class AuthenticationController extends Controller
             $user = $this->authenticationService->apiLogin($request);
             return new UserResource($user);
         } catch (ValidationException | UserException | PasswordException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                404,
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
@@ -68,11 +64,7 @@ class AuthenticationController extends Controller
         try {
             return new UserResource($this->authenticationService->apiRegister($request));
         } catch (BadRequestHttpException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                400,
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }

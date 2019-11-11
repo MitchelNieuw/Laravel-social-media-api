@@ -41,11 +41,7 @@ class DashboardController extends Controller
             $messages = (new MessageRepository())->getMessagesFromFollowingUsers($user->getAttribute('id'));
             return MessageResource::collection($messages);
         } catch (UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage(
-                $exception,
-                $exception->getCode(),
-                $exception->getMessage()
-            );
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
