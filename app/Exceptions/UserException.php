@@ -12,5 +12,5 @@ class UserException extends Exception
     /**
      * @var int
      */
-    protected $code = 400;
+    protected $code = 404;
 }

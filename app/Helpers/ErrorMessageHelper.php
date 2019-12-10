@@ -33,7 +33,7 @@ class ErrorMessageHelper
         if ($exception->getCode() === 500) {
             Log::critical(json_encode($this->prepareInternalServerError($exception), JSON_THROW_ON_ERROR, 512));
         }
-        return response()->json($this->prepareErrorMessage($exception));
+        return response()->json($this->prepareErrorMessage($exception), $exception->getCode());
     }
 
     /**
@@ -52,7 +52,7 @@ class ErrorMessageHelper
      * @param Exception $exception
      * @return array
      */
-    public function prepareInternalServerError(Exception $exception)
+    public function prepareInternalServerError(Exception $exception): array
     {
         return [
             'code' => $exception->getCode(),

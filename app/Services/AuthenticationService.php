@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
@@ -113,7 +112,7 @@ class AuthenticationService
         if ($request->hasFile('profilePicture')) {
             $file = $request->file('profilePicture');
             $fileOriginalName = time() . '_' . $request->get('tag') . '_' . $file->getClientOriginalName();
-            $file->move(public_path('').'/profilePictures/', $fileOriginalName);
+            $file->move(public_path('') . '/profilePictures/', $fileOriginalName);
         }
         return $fileOriginalName;
     }

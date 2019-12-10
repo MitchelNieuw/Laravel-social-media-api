@@ -21,8 +21,8 @@ class MessageResource extends JsonResource
             'image' =>  $this->image,
             'user_id' => $this->user_id,
             'createdAt' => $this->created_at,
-            'user' => $this->whenLoaded('user'),
-            'reactions' => $this->whenLoaded('reactions'),
+            'user' => new UserResource($this->user),
+            'reactions' => ReactionResource::collection($this->reactions),
         ];
     }
 }
