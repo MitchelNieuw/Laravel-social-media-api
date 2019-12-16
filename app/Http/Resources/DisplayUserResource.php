@@ -34,15 +34,15 @@ class DisplayUserResource extends JsonResource
     {
         $arrayStatus = app(ProfileService::class)->getStatusBetweenUsers($this->authenticatedUserId, $this->id);
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'tag' => $this->tag,
-            'email' => $this->email,
-            'profilePicture' => $this->profilePicture,
-            'createdAt' => $this->created_at,
+            'id' => $this->resource->id,
+            'name' => $this->resource->name,
+            'tag' => $this->resource->tag,
+            'email' => $this->resource->email,
+            'profilePicture' => $this->resource->profilePicture,
+            'createdAt' => $this->resource->created_at,
             'messages' => MessageResource::collection($this->whenLoaded('messages')),
-            'followerCount' => (new FollowRepository())->getFollowersCount($this->id),
-            'followingCount' => (new FollowRepository())->getFollowingCount($this->id),
+            'followerCount' => (new FollowRepository())->getFollowersCount($this->resource->id),
+            'followingCount' => (new FollowRepository())->getFollowingCount($this->resource->id),
             'possibleFollow' => $arrayStatus['possibleToFollow'],
             'possibleUnFollow' => $arrayStatus['possibleToUnFollow'],
             'possibleBan' => $arrayStatus['possibleToBan'],

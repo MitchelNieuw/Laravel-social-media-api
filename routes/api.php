@@ -6,6 +6,7 @@ Route::middleware('apilogger')->group(static function() {
             Route::post('login', 'AuthenticationController@login');
             Route::post('register', 'AuthenticationController@register');
             Route::middleware('jwtToken')->group(static function () {
+                Route::post('search', 'SearchController@search');
                 Route::prefix('user')->group(static function () {
                     Route::get('dashboard', 'DashboardController@index');
                     Route::prefix('messages')->group(static function () {

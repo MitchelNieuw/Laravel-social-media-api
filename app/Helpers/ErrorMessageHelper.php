@@ -2,10 +2,8 @@
 
 namespace App\Helpers;
 
-use App\Enums\ResponseMessageEnum;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -13,16 +11,6 @@ use Illuminate\Support\Facades\Log;
  */
 class ErrorMessageHelper
 {
-    /**
-     * @param \Exception $exception
-     * @return RedirectResponse
-     */
-    public function redirectErrorMessage(Exception $exception): RedirectResponse
-    {
-        Log::critical(json_encode($this->prepareErrorMessage($exception), JSON_THROW_ON_ERROR, 512));
-        return back()->withErrors(ResponseMessageEnum::OOPS_SOMETHING_WENT_WRONG);
-    }
-
     /**
      * @param Exception $exception
      * @return JsonResponse
@@ -33,7 +21,11 @@ class ErrorMessageHelper
         if ($exception->getCode() === 500) {
             Log::critical(json_encode($this->prepareInternalServerError($exception), JSON_THROW_ON_ERROR, 512));
         }
-        return response()->json($this->prepareErrorMessage($exception), $exception->getCode());
+        $code = $exception->getCode();
+        if ($exception->getCode() === 0) {
+            $code = 500;
+        }
+        return response()->json($this->prepareErrorMessage($exception), $code);
     }
 
     /**

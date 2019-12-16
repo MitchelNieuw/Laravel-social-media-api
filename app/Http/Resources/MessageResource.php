@@ -10,19 +10,19 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class MessageResource extends JsonResource
 {
     /**
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function toArray($request): array
     {
         return [
-            'id' => $this->id,
-            'content' => $this->content,
-            'image' =>  $this->image,
-            'user_id' => $this->user_id,
-            'createdAt' => $this->created_at,
-            'user' => new UserResource($this->user),
-            'reactions' => ReactionResource::collection($this->reactions),
+            'id' => $this->resource->id,
+            'content' => $this->resource->content,
+            'image' =>  $this->resource->image,
+            'user_id' => $this->resource->user_id,
+            'createdAt' => $this->resource->created_at,
+            'user' => new UserResource($this->whenLoaded('user')),
+            'reactions' => ReactionResource::collection($this->whenLoaded('reactions')),
         ];
     }
 }

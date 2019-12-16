@@ -124,16 +124,14 @@ class AuthenticationService
      */
     private function createUser(Request $request, string $profilePicture): User
     {
-        $user = User::create([
+        $user = (new UserRepository())->create([
             'name' => $request->get('name'),
             'tag' => $request->get('tag'),
             'email' => $request->get('email'),
             'profilePicture' => $profilePicture,
             'password' => Hash::make($request->get('password')),
         ]);
-        $user->update([
-            'jwt_token' => JWTAuth::fromUser($user),
-        ]);
+        $user->update(['jwt_token' => JWTAuth::fromUser($user)]);
         return $user;
     }
 }

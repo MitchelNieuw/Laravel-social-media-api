@@ -31,8 +31,7 @@ class ReactionService
         $this->validateRequest($request);
         $this->checkMessageExists($messageId);
         $fileName = $this->storeImage($request, $user);
-        $reaction = $this->saveReaction($user->getAttribute('id'), $messageId, $request->get('content'), $fileName);
-        return $reaction;
+        return $this->saveReaction($user->getAttribute('id'), $messageId, $request->get('content'), $fileName);
     }
 
     /**

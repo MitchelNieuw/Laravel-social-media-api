@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -10,6 +11,15 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class UserRepository
 {
+    /**
+     * @param array $data
+     * @return User
+     */
+    public function create(array $data): User
+    {
+        return User::create($data);
+    }
+
     /**
      * @param string $token
      * @return User|null
@@ -53,6 +63,17 @@ class UserRepository
     public function getUserByUserTag(string $userTag): ?User
     {
         return User::where('tag', $userTag)->first();
+    }
+
+    /**
+     * @param string $tag
+     * @return Builder[]|Collection
+     */
+    public function searchForUsersInTagOrName(string $tag)
+    {
+        return User::where('tag', 'LIKE', '%' . $tag . '%')
+            ->orWhere('name', 'LIKE', '%' . $tag . '%')
+            ->paginate(10);
     }
 
     /**

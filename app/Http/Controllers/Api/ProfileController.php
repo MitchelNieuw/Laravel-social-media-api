@@ -68,10 +68,7 @@ class ProfileController extends Controller
     {
         try {
             $this->checkUserOfTokenExists($request);
-            $user = (new UserRepository())->getUserByUserTag($tag);
-            if ($user === null) {
-                throw new UserException('user with this tag doesnt exist');
-            }
+            $user = $this->checkUserWithTagExist($tag);
             $followers = $this->followRepository->getFollowersWithRelationships($user->getAttribute('id'));
             return response()->json(['followers' => $followers,]);
         } catch (UserException $exception) {
@@ -90,10 +87,7 @@ class ProfileController extends Controller
     {
         try {
             $this->checkUserOfTokenExists($request);
-            $user = (new UserRepository())->getUserByUserTag($tag);
-            if ($user === null) {
-                throw new UserException('user with this tag doesnt exist');
-            }
+            $user = $this->checkUserWithTagExist($tag);
             $following = $this->followRepository->getFollowingUsersWithRelationships($user->getAttribute('id'));
             return response()->json(['following' => $following,]);
         } catch (UserException $exception) {
@@ -114,6 +108,19 @@ class ProfileController extends Controller
         $user = (new UserRepository())->getUserByJwtToken($token);
         if ($user === null) {
             throw new UserException('User with this token does not exist');
+        }
+        return $user;
+    }
+
+    /**
+     * @param string $tag
+     * @return User
+     * @throws UserException
+     */
+    private function checkUserWithTagExist(string $tag): User
+    {
+        if (($user = (new UserRepository())->getUserByUserTag($tag)) === null) {
+            throw new UserException('user with this tag doesnt exist');
         }
         return $user;
     }
