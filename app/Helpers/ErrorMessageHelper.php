@@ -15,9 +15,7 @@ class ErrorMessageHelper
      * @param Exception $exception
      * @return JsonResponse
      */
-    public function jsonErrorMessage(
-        Exception $exception
-    ): JsonResponse {
+    public function jsonErrorMessage(Exception $exception): JsonResponse {
         if ($exception->getCode() === 500) {
             Log::critical(json_encode($this->prepareInternalServerError($exception), JSON_THROW_ON_ERROR, 512));
         }

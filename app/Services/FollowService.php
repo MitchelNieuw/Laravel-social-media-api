@@ -95,8 +95,7 @@ class FollowService
     public function getAllFollowers(string $userTag): Collection
     {
         $user = $this->checkUserExists($userTag);
-        $followers = $this->followRepository->getFollowersWithRelationships($user->getAttribute('id'));
-        return $followers;
+        return $this->followRepository->getFollowersWithRelationships($user->getAttribute('id'));
     }
 
     /**

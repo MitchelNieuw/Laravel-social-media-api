@@ -10,13 +10,15 @@ use App\Repositories\UserRepository;
 use App\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Request;use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * @package App\Http\Controllers\Api
  */
 class NotificationController extends Controller
 {
+    use ApiControllerTrait;
+
     /**
      * @var ErrorMessageHelper
      */
@@ -32,7 +34,7 @@ class NotificationController extends Controller
 
     /**
      * @param Request $request
-     * @return JsonResponse|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return JsonResponse|AnonymousResourceCollection
      */
     public function list(Request $request)
     {
@@ -60,20 +62,5 @@ class NotificationController extends Controller
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
-    }
-
-    /**
-     * @param Request $request
-     * @return User
-     * @throws UserException
-     */
-    private function checkUserOfTokenExists(Request $request): User
-    {
-        $token = $request->bearerToken();
-        $user = (new UserRepository())->getUserByJwtToken($token);
-        if ($user === null) {
-            throw new UserException('User with this token does not exist');
-        }
-        return $user;
     }
 }

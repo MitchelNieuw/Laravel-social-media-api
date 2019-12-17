@@ -46,6 +46,14 @@ class User extends Authenticatable implements JWTSubject
     /**
      * @return HasMany
      */
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(Reaction::class, 'user_id', 'id');
+    }
+
+    /**
+     * @return HasMany
+     */
     public function following(): HasMany
     {
         return $this->hasMany(Follow::class, 'user_id', 'id');

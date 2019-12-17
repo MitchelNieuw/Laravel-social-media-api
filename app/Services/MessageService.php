@@ -40,8 +40,7 @@ class MessageService extends RepositoryBase
     {
         $this->validateRequest($request);
         $fileName = $this->storeImage($request, $user);
-        $message = $this->saveMessage($user->getAttribute('id'), $request->get('content'), $fileName);
-        return $message;
+        return $this->saveMessage($user->getAttribute('id'), $request->get('content'), $fileName);
     }
 
     /**

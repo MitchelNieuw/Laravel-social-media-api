@@ -15,6 +15,7 @@ class UserObserver
     public function deleted(User $user): void
     {
         $user->messages()->delete();
+        $user->reactions()->delete();
         $user->notifications()->delete();
     }
 }

@@ -6,11 +6,7 @@ use App\Repositories\BanRepository;
 use App\Repositories\FollowRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\NotificationRepository;
-use App\Repositories\UserRepository;
 use App\User;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
 
 /**

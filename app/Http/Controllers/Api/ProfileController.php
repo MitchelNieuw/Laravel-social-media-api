@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
  */
 class ProfileController extends Controller
 {
+    use ApiControllerTrait;
+
     /**
      * @var FollowRepository
      */
@@ -95,21 +97,6 @@ class ProfileController extends Controller
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
-    }
-
-    /**
-     * @param Request $request
-     * @return User
-     * @throws UserException
-     */
-    private function checkUserOfTokenExists(Request $request): User
-    {
-        $token = $request->bearerToken();
-        $user = (new UserRepository())->getUserByJwtToken($token);
-        if ($user === null) {
-            throw new UserException('User with this token does not exist');
-        }
-        return $user;
     }
 
     /**

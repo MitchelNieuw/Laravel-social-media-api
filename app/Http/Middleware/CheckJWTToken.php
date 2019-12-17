@@ -15,7 +15,7 @@ use Tymon\JWTAuth\Http\Middleware\BaseMiddleware;
 /**
  * @package App\Http\Middleware
  */
-class RefreshTokenIfExpired extends BaseMiddleware
+class CheckJWTToken extends BaseMiddleware
 {
     /**
      * @param Request $request

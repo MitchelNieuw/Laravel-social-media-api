@@ -4,13 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Exceptions\MessageException;
 use App\Exceptions\ReactionException;
-use App\Exceptions\UserException;
 use App\Helpers\ErrorMessageHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ReactionResource;
-use App\Repositories\UserRepository;
 use App\Services\ReactionService;
-use App\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,6 +17,8 @@ use Illuminate\Http\Request;
  */
 class ReactionsController extends Controller
 {
+    use ApiControllerTrait;
+
     /**
      * @var ErrorMessageHelper
      */
@@ -67,28 +66,11 @@ class ReactionsController extends Controller
         try {
             $user = $this->checkUserOfTokenExists($request);
             $message = $this->reactionService->deleteReaction($user, $id, $reactionId);
-            return response()->json([
-                'message' => $message,
-            ]);
+            return response()->json(['message' => $message]);
         } catch (ReactionException | MessageException $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
-    }
-
-    /**
-     * @param Request $request
-     * @return User
-     * @throws UserException
-     */
-    private function checkUserOfTokenExists(Request $request): User
-    {
-        $token = $request->bearerToken();
-        $user = (new UserRepository())->getUserByJwtToken($token);
-        if ($user === null) {
-            throw new UserException('User with this token does not exist');
-        }
-        return $user;
     }
 }

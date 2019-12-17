@@ -8,11 +8,9 @@ use App\Exceptions\NotificationException;
 use App\Exceptions\UserException;
 use App\Helpers\ErrorMessageHelper;
 use App\Http\Controllers\Controller;
-use App\Repositories\UserRepository;
 use App\Services\BanService;
 use App\Services\FollowService;
 use App\Services\NotificationService;
-use App\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,6 +20,8 @@ use Illuminate\Http\Request;
  */
 class UserFollowStatusController extends Controller
 {
+    use ApiControllerTrait;
+
     /**
      * @var ErrorMessageHelper
      */
@@ -178,20 +178,5 @@ class UserFollowStatusController extends Controller
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
-    }
-
-    /**
-     * @param Request $request
-     * @return User
-     * @throws UserException
-     */
-    private function checkUserOfTokenExists(Request $request): User
-    {
-        $token = $request->bearerToken();
-        $user = (new UserRepository())->getUserByJwtToken($token);
-        if ($user === null) {
-            throw new UserException('User with this token does not exist');
-        }
-        return $user;
     }
 }
