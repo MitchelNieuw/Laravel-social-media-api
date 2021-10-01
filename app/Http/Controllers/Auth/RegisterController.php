@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\User;
+use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-/**
- * @package App\Http\Controllers\Auth
- */
 class RegisterController extends Controller
 {
     use RegistersUsers;
@@ -56,7 +53,7 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'tag' => $data['tag'],
             'email' => $data['email'],
-            'profilePicture' => $this->storeProfilePicture($request),
+            'profile_picture' => $this->storeProfilePicture($request),
             'password' => Hash::make($data['password']),
         ]);
         $user->update([

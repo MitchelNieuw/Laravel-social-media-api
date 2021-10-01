@@ -6,15 +6,8 @@ use App\Repositories\FollowRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @package App\Http\Resources
- */
 class SearchUserResource extends JsonResource
 {
-    /**
-     * @param Request $request
-     * @return array
-     */
     public function toArray($request): array
     {
         return [
@@ -22,7 +15,7 @@ class SearchUserResource extends JsonResource
             'name' => $this->resource->name,
             'email' => $this->resource->email,
             'tag' => $this->resource->tag,
-            'profilePicture' => $this->resource->profilePicture,
+            'profilePicture' => $this->resource->profile_picture,
             'createdAt' => $this->resource->created_at,
         ];
     }

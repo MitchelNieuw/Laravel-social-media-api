@@ -2,9 +2,6 @@
 
 namespace App\Enums;
 
-/**
- * @package App\Enums
- */
 class ResponseMessageEnum
 {
     public const OOPS_SOMETHING_WENT_WRONG = 'Ooops something went wrong!';
@@ -18,6 +15,7 @@ class ResponseMessageEnum
     public const FOLLOWING_SELF_NOT_POSSIBLE = 'Following yourself is not possible';
     public const UNFOLLOWING_SELF_NOT_POSSIBLE = 'Unfollowing yourself is not possible';
     public const REACTION_DELETED_SUCCESSFUL = 'Reaction deleted successful';
+    public const USER_WITH_TOKEN_DOESNT_EXIST = 'User with this token doesn\'t exist!';
 
 
     public const BAN_SUCCESSFUL = 'Ban successful';

@@ -18,6 +18,8 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('tag');
             $table->string('email')->unique();
+            $table->string('profile_picture')->default('profile.png');
+            $table->string('jwt_token', 500)->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

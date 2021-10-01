@@ -3,61 +3,29 @@
 namespace App\Services;
 
 use App\Enums\ResponseMessageEnum;
-use App\Exceptions\BanException;
-use App\Exceptions\UserException;
-use App\Follow;
-use App\Repositories\BanRepository;
-use App\Repositories\FollowRepository;
-use App\Repositories\UserRepository;
+use App\Exceptions\{BanException, UserException};
+use App\Models\Follow;
+use App\Repositories\{BanRepository, FollowRepository, UserRepository};
 
-/**
- * @package App\Services
- */
 class BanService
 {
     use ServiceTrait;
 
-    /**
-     * @var UserRepository
-     */
-    protected $userRepository;
-
-    /**
-     * @var FollowRepository
-     */
-    protected $followRepository;
-
-    /**
-     * @var BanRepository
-     */
-    protected $banRepository;
-
-    /**
-     * @param UserRepository $userRepository
-     * @param FollowRepository $followRepository
-     * @param BanRepository $banRepository
-     */
     public function __construct(
-        UserRepository $userRepository,
-        FollowRepository $followRepository,
-        BanRepository $banRepository
-    ) {
-        $this->userRepository = $userRepository;
-        $this->followRepository = $followRepository;
-        $this->banRepository = $banRepository;
+        protected UserRepository $userRepository,
+        protected FollowRepository $followRepository,
+        protected BanRepository $banRepository
+    )
+    {
     }
 
     /**
-     * @param string $userTag
-     * @param int $authenticatedUserId
-     * @return string
      * @throws BanException
      * @throws UserException
      */
     public function banUserByTag(string $userTag, int $authenticatedUserId): string
     {
-        $userToBan = $this->checkUserExists($userTag);
-        $userToBanId = $userToBan->getAttribute('id');
+        $userToBanId = $this->checkUserExists($userTag)->id;
         $this->checkUserBanSelf($authenticatedUserId, $userToBanId);
         $userFollowStatus = $this->checkUserGotUnBanned($authenticatedUserId, $userToBanId);
         if (!$this->createFollowStatusRecord($userFollowStatus, $authenticatedUserId, $userToBanId, 4)){
@@ -67,16 +35,12 @@ class BanService
     }
 
     /**
-     * @param string $userTag
-     * @param int $authenticatedUserId
-     * @return string
      * @throws BanException
      * @throws UserException
      */
     public function unBanByUserTag(string $userTag, int $authenticatedUserId): string
     {
-        $userToUnBan = $this->checkUserExists($userTag);
-        $userToUnBanId = $userToUnBan->getAttribute('id');
+        $userToUnBanId = $this->checkUserExists($userTag)->id;
         $this->checkUserUnBanSelf($authenticatedUserId, $userToUnBanId);
         $userFollowStatus = $this->checkUserGotBanned($authenticatedUserId, $userToUnBanId);
         $this->updateFollowRecordUser($userFollowStatus, $authenticatedUserId, '^');
@@ -84,9 +48,6 @@ class BanService
     }
 
     /**
-     * @param int $authenticatedUserId
-     * @param int $userToBanId
-     * @return Follow
      * @throws BanException
      */
     private function checkUserGotUnBanned(int $authenticatedUserId, int $userToBanId): Follow
@@ -98,13 +59,11 @@ class BanService
         return $userFollowStatus;
     }
 
-    /**
-     * @param Follow $userFollowStatus
-     * @param int $authenticatedUserId
-     * @param string $operator
-     */
-    private function updateFollowRecordUser(Follow $userFollowStatus, int $authenticatedUserId, string $operator): void
-    {
+    private function updateFollowRecordUser(
+        ?Follow $userFollowStatus,
+        int $authenticatedUserId,
+        string $operator
+    ): void {
         if ($userFollowStatus !== null) {
             $status = $this->getNewStatus($userFollowStatus, $authenticatedUserId, $operator, 'ban');
             $this->followRepository->updateFollow($userFollowStatus, $status);
@@ -112,9 +71,6 @@ class BanService
     }
 
     /**
-     * @param int $authenticatedUserId
-     * @param int $userToUnBanId
-     * @return Follow
      * @throws BanException
      */
     private function checkUserGotBanned(int $authenticatedUserId, int $userToUnBanId): Follow
@@ -127,8 +83,6 @@ class BanService
     }
 
     /**
-     * @param int $authenticatedUserId
-     * @param int $userToBanId
      * @throws BanException
      */
     private function checkUserBanSelf(int $authenticatedUserId, int $userToBanId): void
@@ -139,8 +93,6 @@ class BanService
     }
 
     /**
-     * @param int $authenticatedUserId
-     * @param int $userToBanId
      * @throws BanException
      */
     private function checkUserUnBanSelf(int $authenticatedUserId, int $userToBanId): void

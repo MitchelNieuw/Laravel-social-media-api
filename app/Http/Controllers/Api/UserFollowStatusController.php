@@ -2,69 +2,24 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\BanException;
-use App\Exceptions\FollowException;
-use App\Exceptions\NotificationException;
-use App\Exceptions\UserException;
 use App\Helpers\ErrorMessageHelper;
-use App\Http\Controllers\Controller;
-use App\Services\BanService;
-use App\Services\FollowService;
-use App\Services\NotificationService;
+use App\Services\{BanService, FollowService, NotificationService};
 use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\{JsonResponse, Request};
 
-/**
- * @package App\Http\Controllers\Api
- */
-class UserFollowStatusController extends Controller
+class UserFollowStatusController
 {
     use ApiControllerTrait;
 
-    /**
-     * @var ErrorMessageHelper
-     */
-    protected $errorMessageHelper;
-
-    /**
-     * @var FollowService
-     */
-    protected $followService;
-
-    /**
-     * @var BanService
-     */
-    protected $banService;
-
-    /**
-     * @var NotificationService
-     */
-    protected $notificationService;
-
-    /**
-     * @param ErrorMessageHelper $errorMessageHelper
-     * @param FollowService $followService
-     * @param BanService $banService
-     * @param NotificationService $notificationService
-     */
     public function __construct(
-        ErrorMessageHelper $errorMessageHelper,
-        FollowService $followService,
-        BanService $banService,
-        NotificationService $notificationService
-    ) {
-        $this->errorMessageHelper = $errorMessageHelper;
-        $this->followService = $followService;
-        $this->banService = $banService;
-        $this->notificationService = $notificationService;
+        public ErrorMessageHelper $errorMessageHelper,
+        public FollowService $followService,
+        public BanService $banService,
+        public NotificationService $notificationService
+    )
+    {
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
     public function follow(Request $request, string $tag): JsonResponse
     {
         try {
@@ -73,18 +28,11 @@ class UserFollowStatusController extends Controller
             return response()->json([
                 'message' => $message,
             ]);
-        } catch (FollowException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
     public function unFollow(Request $request, string $tag): JsonResponse
     {
         try {
@@ -93,18 +41,11 @@ class UserFollowStatusController extends Controller
             return response()->json([
                 'message' => $message,
             ]);
-        } catch (FollowException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
     public function ban(Request $request, string $tag): JsonResponse
     {
         try {
@@ -113,18 +54,11 @@ class UserFollowStatusController extends Controller
             return response()->json([
                 'message' => $message,
             ]);
-        } catch (BanException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
     public function unBan(Request $request, string $tag): JsonResponse
     {
         try {
@@ -133,18 +67,11 @@ class UserFollowStatusController extends Controller
             return response()->json([
                 'message' => $message,
             ]);
-        } catch (BanException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
     public function notificationsOn(Request $request, string $tag): JsonResponse
     {
         try {
@@ -153,18 +80,11 @@ class UserFollowStatusController extends Controller
             return response()->json([
                 'message' => $message,
             ]);
-        } catch (NotificationException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
     public function notificationsOff(Request $request, string $tag): JsonResponse
     {
         try {
@@ -173,8 +93,6 @@ class UserFollowStatusController extends Controller
             return response()->json([
                 'message' => $message,
             ]);
-        } catch (NotificationException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }

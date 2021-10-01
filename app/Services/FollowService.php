@@ -3,115 +3,80 @@
 namespace App\Services;
 
 use App\Enums\ResponseMessageEnum;
-use App\Exceptions\FollowException;
-use App\Exceptions\UserException;
-use App\Follow;
-use App\Repositories\FollowRepository;
-use App\Repositories\UserRepository;
+use App\Exceptions\{FollowException, UserException};
+use App\Models\Follow;
+use App\Repositories\{FollowRepository, UserRepository};
 use Illuminate\Database\Eloquent\Collection;
 
-/**
- * @package App\Services
- */
 class FollowService
 {
     use ServiceTrait;
 
-    /**
-     * @var UserRepository
-     */
-    protected $userRepository;
-
-    /**
-     * @var FollowRepository
-     */
-    protected $followRepository;
-
-    /**
-     * @param UserRepository $userRepository
-     * @param FollowRepository $followRepository
-     */
-    public function __construct(UserRepository $userRepository, FollowRepository $followRepository)
+    public function __construct(
+        protected UserRepository $userRepository,
+        protected FollowRepository $followRepository
+    )
     {
-        $this->userRepository = $userRepository;
-        $this->followRepository = $followRepository;
     }
 
     /**
-     * @param string $userTag
-     * @param int $authenticatedUserId
-     * @return string
      * @throws FollowException
      * @throws UserException
      */
     public function follow(string $userTag, int $authenticatedUserId): string
     {
-        $userToFollow = $this->checkUserExists($userTag);
-        $userToFollowId = $userToFollow->getAttribute('id');
+        $userToFollowId = $this->checkUserExists($userTag)->id;
         $this->checkUserTriesToFollowSelf($authenticatedUserId, $userToFollowId);
         $userFollowStatus = $this->getFollowStatusRecord($authenticatedUserId, $userToFollowId);
         if (!$this->createFollowStatusRecord($userFollowStatus, $authenticatedUserId, $userToFollowId, 1)) {
-            $status = $this->getNewStatus($userFollowStatus, $authenticatedUserId, '|', 'follow');
-            $this->followRepository->updateFollow($userFollowStatus, $status);
+            $this->followRepository->updateFollow(
+                $userFollowStatus,
+                $this->getNewStatus($userFollowStatus, $authenticatedUserId, '|', 'follow')
+            );
         }
         return ResponseMessageEnum::FOLLOW_SUCCESSFUL;
     }
 
     /**
-     * @param string $userTag
-     * @param int $authenticatedUserId
-     * @return string
      * @throws FollowException
      * @throws UserException
      */
     public function unFollow(string $userTag, int $authenticatedUserId): string
     {
-        $userToUnFollow = $this->checkUserExists($userTag);
-        $userToUnFollowId = $userToUnFollow->getAttribute('id');
+        $userToUnFollowId = $this->checkUserExists($userTag)->id;
         $this->checkUserTriesToUnFollowSelf($authenticatedUserId, $userToUnFollowId);
         $this->updateFollowRecordStatus(
-            $this->getFollowStatusUnFollow($authenticatedUserId, $userToUnFollowId, $userTag),
+            $this->getFollowStatusUnFollow($authenticatedUserId, $userToUnFollowId),
             $authenticatedUserId
         );
         return ResponseMessageEnum::UNFOLLOW_SUCCESSFUL;
     }
 
     /**
-     * @param string $userTag
-     * @return Collection
      * @throws UserException
      */
     public function getAllFollowing(string $userTag): Collection
     {
-        $user = $this->checkUserExists($userTag);
-        return $this->followRepository->getFollowingUsersWithRelationships($user->getAttribute('id'));
+        return $this->followRepository->getFollowingUsersWithRelationships($this->checkUserExists($userTag)->id);
     }
 
     /**
-     * @param string $userTag
-     * @return Collection
      * @throws UserException
      */
     public function getAllFollowers(string $userTag): Collection
     {
-        $user = $this->checkUserExists($userTag);
-        return $this->followRepository->getFollowersWithRelationships($user->getAttribute('id'));
+        return $this->followRepository->getFollowersWithRelationships($this->checkUserExists($userTag)->id);
     }
 
-    /**
-     * @param Follow $userFollowStatus
-     * @param int $authenticatedUserId
-     */
     private function updateFollowRecordStatus(Follow $userFollowStatus, int $authenticatedUserId): void
     {
-        $status = $this->getNewStatus($userFollowStatus, $authenticatedUserId, '^', 'follow');
-        $this->followRepository->updateFollow($userFollowStatus, $status);
+        $this->followRepository->updateFollow(
+            $userFollowStatus,
+            $this->getNewStatus($userFollowStatus, $authenticatedUserId, '^', 'follow')
+        );
     }
 
     /**
-     * @param int $authenticatedUserId
-     * @param int $userToFollowId
-     * @return Follow
      * @throws FollowException
      */
     private function getFollowStatusRecord(int $authenticatedUserId, int $userToFollowId): Follow
@@ -124,13 +89,9 @@ class FollowService
     }
 
     /**
-     * @param int $authenticatedUserId
-     * @param int $userToUnFollowId
-     * @param string $userTag
-     * @return Follow
      * @throws FollowException
      */
-    private function getFollowStatusUnFollow(int $authenticatedUserId, int $userToUnFollowId, string $userTag): Follow
+    private function getFollowStatusUnFollow(int $authenticatedUserId, int $userToUnFollowId): Follow
     {
         $userFollowStatus = $this->followRepository->getFollowStatusForUnFollow(
             $authenticatedUserId,
@@ -143,8 +104,6 @@ class FollowService
     }
 
     /**
-     * @param int $authenticatedUserId
-     * @param int $followUserId
      * @throws FollowException
      */
     private function checkUserTriesToFollowSelf(int $authenticatedUserId, int $followUserId): void
@@ -155,8 +114,6 @@ class FollowService
     }
 
     /**
-     * @param int $authenticatedUserId
-     * @param int $unFollowUserId
      * @throws FollowException
      */
     private function checkUserTriesToUnFollowSelf(int $authenticatedUserId, int $unFollowUserId): void

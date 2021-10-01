@@ -2,73 +2,37 @@
 
 namespace App\Services;
 
-use App\Repositories\BanRepository;
-use App\Repositories\FollowRepository;
-use App\Repositories\MessageRepository;
-use App\Repositories\NotificationRepository;
-use App\User;
+use App\Repositories\{BanRepository, FollowRepository, MessageRepository, NotificationRepository};
+use App\Models\User;
 use Illuminate\View\View;
 
-/**
- * @package App\Services
- */
 class ProfileService
 {
     use ServiceTrait;
 
-    /**
-     * @var FollowRepository
-     */
-    protected $followRepository;
-
-    /**
-     * @var BanRepository
-     */
-    protected $banRepository;
-
-    /**
-     * @var NotificationRepository
-     */
-    protected $notificationRepository;
-
-    /**
-     * @param FollowRepository $followRepository
-     * @param BanRepository $banRepository
-     * @param NotificationRepository $notificationRepository
-     */
     public function __construct(
-        FollowRepository $followRepository,
-        BanRepository $banRepository,
-        NotificationRepository $notificationRepository
-    ) {
-        $this->followRepository = $followRepository;
-        $this->banRepository = $banRepository;
-        $this->notificationRepository = $notificationRepository;
+        protected FollowRepository $followRepository,
+        protected BanRepository $banRepository,
+        protected NotificationRepository $notificationRepository
+    )
+    {
     }
 
-    /**
-     * @return View
-     */
     public function displayProfile(): View
     {
-        $userId = auth()->user()->getAuthIdentifier();
+        $userId = auth()->id();
         $messages = (new MessageRepository())->getMessagesByUserId($userId);
         $followingCount = $this->followRepository->getFollowingCount($userId);
         $followersCount = $this->followRepository->getFollowersCount($userId);
         return view('profile', compact('messages', 'followingCount', 'followersCount'));
     }
 
-    /**
-     * @param User $user
-     * @return array
-     */
     public function displayUser(User $user): array
     {
-        $userId = $user->getAttribute('id');
-        $authenticatedUserId = null;
-        if (auth()->user() !== null) {
-            $authenticatedUserId = auth()->user()->getAuthIdentifier();
-        }
+        $userId = $user->id;
+        $authenticatedUserId = (auth()->user() !== null)
+            ? auth()->id()
+            : null;
         $arrayStatus = $this->getStatusBetweenUsers($authenticatedUserId, $userId);
         return [
             'user' => $user,
@@ -84,12 +48,7 @@ class ProfileService
         ];
     }
 
-    /**
-     * @param int $authenticatedUserId
-     * @param int $userId
-     * @return array
-     */
-    public function getStatusBetweenUsers(int $authenticatedUserId, int $userId): array
+    public function getStatusBetweenUsers(?int $authenticatedUserId, int $userId): array
     {
         $possibleFollow = false;
         $possibleUnFollow = false;
@@ -132,51 +91,26 @@ class ProfileService
         ];
     }
 
-    /**
-     * @param int $authenticatedUserId
-     * @param int $userId
-     * @return bool
-     */
     private function getPossibleToFollow(int $authenticatedUserId, int $userId): bool
     {
         return $this->followRepository->checkPossibleToFollow($authenticatedUserId, $userId);
     }
 
-    /**
-     * @param int $authenticatedUserId
-     * @param int $userId
-     * @return bool
-     */
     private function getPossibleToUnFollow(int $authenticatedUserId, int $userId): bool
     {
         return ($this->followRepository->getFollowStatusForUnFollow($authenticatedUserId, $userId) !== null);
     }
 
-    /**
-     * @param int $authenticatedUserId
-     * @param int $userId
-     * @return bool
-     */
     private function getPossibleToBan(int $authenticatedUserId, int $userId): bool
     {
         return $this->banRepository->checkPossibleToBan($authenticatedUserId, $userId);
     }
 
-    /**
-     * @param int $authenticatedUserId
-     * @param int $userId
-     * @return bool
-     */
     private function getPossibleToUnBan(int $authenticatedUserId, int $userId): bool
     {
         return ($this->banRepository->getFollowStatusForUnBan($authenticatedUserId, $userId) !== null);
     }
 
-    /**
-     * @param int $authenticatedUserId
-     * @param int $userId
-     * @return bool
-     */
     private function getPossibleToTurnOnNotifications(int $authenticatedUserId, int $userId): bool
     {
         return $this->notificationRepository->checkPossibleToTurnOnNotifications(
@@ -185,15 +119,13 @@ class ProfileService
         );
     }
 
-    /**
-     * @param int $authenticatedUserId
-     * @param int $userId
-     * @return bool
-     */
     private function getPossibleToTurnOffNotifications(int $authenticatedUserId, int $userId): bool
     {
         return (
-            $this->notificationRepository->checkNotificationsAreTurnedOnForAuthenticatedUser($authenticatedUserId, $userId) !== null
+            $this->notificationRepository->checkNotificationsAreTurnedOnForAuthenticatedUser(
+                $authenticatedUserId,
+                $userId
+            ) !== null
         );
     }
 }

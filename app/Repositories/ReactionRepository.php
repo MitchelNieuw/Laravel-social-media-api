@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Reaction;
+use App\Models\Reaction;
 
 /**
  * @package App\Repositories

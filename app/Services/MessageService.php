@@ -4,17 +4,11 @@ namespace App\Services;
 
 use App\Enums\ResponseMessageEnum;
 use App\Exceptions\MessageException;
-use App\Message;
-use App\Repositories\MessageRepository;
-use App\Repositories\RepositoryBase;
-use App\Repositories\UserRepository;
-use App\User;
+use App\Repositories\{MessageRepository, RepositoryBase, UserRepository};
+use App\Models\{Message, User};
 use Exception;
 use Illuminate\Http\Request;
 
-/**
- * @package App\Services
- */
 class MessageService extends RepositoryBase
 {
     /**

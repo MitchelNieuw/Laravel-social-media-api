@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Follow;
+use App\Models\Follow;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -63,7 +63,7 @@ class FollowRepository extends RepositoryBase
     public function getFollowingUsersWithRelationships(int $userId): Collection
     {
         return $this->getFollowing($userId)
-            ->with('user:id,name,tag,profilePicture', 'following:id,name,tag,profilePicture')
+            ->with('user:id,name,tag,profile_picture', 'following:id,name,tag,profile_picture')
             ->get();
     }
 
@@ -103,7 +103,7 @@ class FollowRepository extends RepositoryBase
     public function getFollowersWithRelationships(int $userId): Collection
     {
         return $this->getFollowers($userId)
-            ->with('user:id,name,tag,profilePicture', 'following:id,name,tag,profilePicture')
+            ->with('user:id,name,tag,profile_picture', 'following:id,name,tag,profile_picture')
             ->get();
     }
 

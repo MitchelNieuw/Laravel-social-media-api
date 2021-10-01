@@ -5,39 +5,24 @@ namespace App\Services;
 
 use App\Enums\FollowEnum;
 use App\Exceptions\UserException;
-use App\Follow;
-use App\Repositories\FollowRepository;
-use App\Repositories\UserRepository;
-use App\User;
+use App\Repositories\{FollowRepository, UserRepository};
+use App\Models\{Follow, User};
 
-/**
- * @package App\Services
- */
 trait ServiceTrait
 {
     /**
-     * @param string $userTag
-     * @return User
      * @throws UserException
      */
     protected function checkUserExists(string $userTag): User
     {
-        $user = (new UserRepository())->getUserByUserTag($userTag);
-        if ($user === null) {
+        if (($user = (new UserRepository())->getUserByUserTag($userTag)) === null) {
             throw new UserException('User with the tag ' . $userTag. ' doesnt exist');
         }
         return $user;
     }
 
-    /**
-     * @param Follow $userFollowStatus
-     * @param int $authenticatedUserId
-     * @param int $userId
-     * @param int $status
-     * @return bool
-     */
     protected function createFollowStatusRecord(
-        Follow $userFollowStatus,
+        ?Follow $userFollowStatus,
         int $authenticatedUserId,
         int $userId,
         int $status
@@ -49,42 +34,33 @@ trait ServiceTrait
         return false;
     }
 
-    /**
-     * @param Follow $userFollowStatus
-     * @param int $userId
-     * @param string $operator
-     * @param string $type
-     * @return int
-     */
     protected function getNewStatus(Follow $userFollowStatus, int $userId, string $operator, string $type): int
     {
-        $status = $userFollowStatus->getAttribute('status');
+        $status = $userFollowStatus->status;
         $newBitArray = $this->getBitValueOnType($type);
+        $followStatusUserId = $userFollowStatus->user_id;
+        $followStatusFollowUserId = $userFollowStatus->follow_user_id;
         switch ($operator):
             case ('|'):
-                if ($userFollowStatus->getAttribute('user_id') === $userId) {
-                    $status = $userFollowStatus->getAttribute('status') | $newBitArray[0];
+                if ($followStatusUserId === $userId) {
+                    $status |= $newBitArray[0];
                 }
-                if ($userFollowStatus->getAttribute('follow_user_id') === $userId) {
-                    $status = $userFollowStatus->getAttribute('status') | $newBitArray[1];
+                if ($followStatusFollowUserId === $userId) {
+                    $status |= $newBitArray[1];
                 }
                 break;
             case ('^'):
-                if ($userFollowStatus->getAttribute('user_id') === $userId) {
-                    $status = $userFollowStatus->getAttribute('status') ^ $newBitArray[0];
+                if ($followStatusUserId === $userId) {
+                    $status ^= $newBitArray[0];
                 }
-                if ($userFollowStatus->getAttribute('follow_user_id') === $userId) {
-                    $status = $userFollowStatus->getAttribute('status') ^ $newBitArray[1];
+                if ($followStatusFollowUserId === $userId) {
+                    $status ^= $newBitArray[1];
                 }
                 break;
         endswitch;
         return $status;
     }
 
-    /**
-     * @param string $type
-     * @return array
-     */
     protected function getBitValueOnType(string $type): array
     {
         $userIdNewBit = 0;

@@ -2,11 +2,8 @@
 
 namespace App\Repositories;
 
-use App\Follow;
+use App\Models\Follow;
 
-/**
- * @package App\Repositories
- */
 class BanRepository extends RepositoryBase
 {
     /**

@@ -2,27 +2,22 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ResponseMessageEnum;
 use App\Exceptions\UserException;
+use App\Models\User;
 use App\Repositories\UserRepository;
-use App\User;
 use Illuminate\Http\Request;
 
-/**
- * @package App\Http\Controllers\Api
- */
 trait ApiControllerTrait
 {
     /**
-     * @param Request $request
-     * @return User
      * @throws UserException
      */
     protected function checkUserOfTokenExists(Request $request): User
     {
-        $token = $request->bearerToken();
-        $user = (new UserRepository())->getUserByJwtToken($token);
+        $user = (new UserRepository())->getUserByJwtToken($request->bearerToken());
         if ($user === null) {
-            throw new UserException('User with this token does not exist');
+            throw new UserException(ResponseMessageEnum::USER_WITH_TOKEN_DOESNT_EXIST);
         }
         return $user;
     }

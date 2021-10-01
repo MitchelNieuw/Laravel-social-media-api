@@ -4,15 +4,8 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @package App\Http\Resources
- */
 class MessageResource extends JsonResource
 {
-    /**
-     * @param \Illuminate\Http\Request $request
-     * @return array
-     */
     public function toArray($request): array
     {
         return [
