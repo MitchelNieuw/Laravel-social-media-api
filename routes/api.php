@@ -10,12 +10,14 @@ use App\Http\Controllers\Api\{
     SearchController,
     UserFollowStatusController
 };
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(static function () {
     Route::post('login', [AuthenticationController::class, 'login']);
     Route::post('register', [AuthenticationController::class ,'register']);
 
-    Route::middleware('jwtToken')->group(static function () {
+    Route::middleware('auth:api')->group(static function () {
+        Route::post('logout', [AuthenticationController::class, 'logout']);
         Route::post('search', [SearchController::class, 'search']);
 
         Route::prefix('user')->group(static function () {

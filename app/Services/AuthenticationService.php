@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthenticationService
 {
@@ -24,9 +23,7 @@ class AuthenticationService
     {
         $this->validateLoginRequest($request);
         $user = $this->checkUserWithThisEmailExists($request->get('email'));
-        $this->checkCorrectPassword($request->get('password'), $user->getAttribute('password'));
-        $user->setAttribute('jwt_token', JWTAuth::fromUser($user));
-        $user->save();
+        $this->checkCorrectPassword($request->get('password'), $user->password);
         return $user;
     }
 
@@ -49,7 +46,7 @@ class AuthenticationService
 
         $validator = validator()->make($request->all(), [
             'email' => 'required|string|email',
-            'password' => 'required|string',
+            'password' => 'required|string|max:255',
         ]);
         if ($validator->fails()) {
             throw new ValidationException($validator);
@@ -61,9 +58,8 @@ class AuthenticationService
      */
     private function checkUserWithThisEmailExists(string $email): User
     {
-        $user = (new UserRepository())->getUserByEmail($email);
-        if ($user === null) {
-            throw new UserException('User with this email not found');
+        if (($user = (new UserRepository)->getUserByEmail($email)) === null) {
+            throw new UserException('User with this email not found!');
         }
         return $user;
     }
@@ -74,7 +70,7 @@ class AuthenticationService
     private function checkCorrectPassword(string $requestPassword, string $userPassword): void
     {
         if (!Hash::check($requestPassword, $userPassword)) {
-            throw new PasswordException('Password not correct');
+            throw new PasswordException('Wrong email password combination!');
         }
     }
 
@@ -99,24 +95,22 @@ class AuthenticationService
         $fileOriginalName = 'profile.png';
         if ($request->hasFile('profilePicture')) {
             $file = $request->file('profilePicture');
-            $fileOriginalName = time() . '_' . $request->get('tag') . '_' . $file->getClientOriginalName();
-            $file->move(public_path() . '/profilePictures/', $fileOriginalName);
+            $time = time();
+            $fileOriginalName = "{$time}_{$request->get('tag')}_{$file->getClientOriginalName()}";
+            $publicPath = public_path();
+            $file->move("$publicPath/profilePictures/$fileOriginalName");
         }
         return $fileOriginalName;
     }
 
     private function createUser(Request $request, string $profilePicture): User
     {
-        $user = (new UserRepository())->create([
+        return (new UserRepository)->create([
             'name' => $request->get('name'),
             'tag' => $request->get('tag'),
             'email' => $request->get('email'),
-            'profilePicture' => $profilePicture,
+            'profile_picture' => $profilePicture,
             'password' => Hash::make($request->get('password')),
         ]);
-        $user->update([
-            'jwt_token' => JWTAuth::fromUser($user),
-        ]);
-        return $user;
     }
 }

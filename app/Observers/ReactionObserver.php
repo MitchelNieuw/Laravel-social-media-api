@@ -30,7 +30,7 @@ class ReactionObserver
 
     private function checkSendNotificationIsPossible(User $userForNotification, User $authenticatedUser): ?Follow
     {
-        return (new NotificationRepository())->checkNotificationsAreTurnedOnForAuthenticatedUser(
+        return (new NotificationRepository)->checkNotificationsAreTurnedOnForAuthenticatedUser(
             $authenticatedUser->id,
             $userForNotification->id
         );

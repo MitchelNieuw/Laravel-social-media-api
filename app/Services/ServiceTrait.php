@@ -15,8 +15,8 @@ trait ServiceTrait
      */
     protected function checkUserExists(string $userTag): User
     {
-        if (($user = (new UserRepository())->getUserByUserTag($userTag)) === null) {
-            throw new UserException('User with the tag ' . $userTag. ' doesnt exist');
+        if (($user = (new UserRepository)->getUserByUserTag($userTag)) === null) {
+            throw new UserException("User with the tag $userTag doesnt exist");
         }
         return $user;
     }
@@ -26,7 +26,8 @@ trait ServiceTrait
         int $authenticatedUserId,
         int $userId,
         int $status
-    ): bool {
+    ): bool
+    {
         if ($userFollowStatus === null) {
             (new FollowRepository())->follow($authenticatedUserId, $userId, $status);
             return true;

@@ -11,8 +11,6 @@ use Illuminate\Http\{JsonResponse, Request, Resources\Json\AnonymousResourceColl
 
 class MessageController
 {
-    use ApiControllerTrait;
-
     public function __construct(
         public MessageService $messageService,
         public ErrorMessageHelper $errorMessageHelper
@@ -20,12 +18,12 @@ class MessageController
     {
     }
 
-    public function list(Request $request): JsonResponse|AnonymousResourceCollection
+    public function list(): JsonResponse|AnonymousResourceCollection
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $messages = (new MessageRepository())->getMessagesByUserId($user->getAttribute('id'));
-            return MessageResource::collection($messages);
+            return MessageResource::collection(
+                (new MessageRepository())->getMessagesByUserId(auth('api')->id())
+            );
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
@@ -34,19 +32,18 @@ class MessageController
     public function store(Request $request): MessageResource|JsonResponse
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $message = $this->messageService->storeMessage($request, $user);
-            return new MessageResource($message);
+            return new MessageResource(
+                $this->messageService->storeMessage($request, auth('api')->user())
+            );
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    public function delete(int $messageId, Request $request): JsonResponse
+    public function delete(int $messageId): JsonResponse
     {
         try {
-            $authenticatedUser = $this->checkUserOfTokenExists($request);
-            $this->messageService->deleteMessage($messageId, $authenticatedUser->getAttribute('id'));
+            $this->messageService->deleteMessage($messageId, auth('api')->id());
             return response()->json([
                 'message' => 'Delete successful!',
             ]);

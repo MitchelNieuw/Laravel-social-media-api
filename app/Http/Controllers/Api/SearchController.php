@@ -20,9 +20,7 @@ class SearchController
     {
         try {
             return SearchUserResource::collection(
-                (new UserRepository())->searchForUsersInTagOrName(
-                    $request->get('tag')
-                )
+                (new UserRepository)->searchForUsersInTagOrName($request->get('tag'))
             );
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);

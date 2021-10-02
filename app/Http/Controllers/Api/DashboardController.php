@@ -6,24 +6,22 @@ use App\Helpers\ErrorMessageHelper;
 use App\Http\Resources\MessageResource;
 use App\Repositories\MessageRepository;
 use Exception;
-use Illuminate\Http\{JsonResponse, Request, Resources\Json\AnonymousResourceCollection};
+use Illuminate\Http\{JsonResponse, Resources\Json\AnonymousResourceCollection};
 
 class DashboardController
 {
-    use ApiControllerTrait;
-
     public function __construct(
         public ErrorMessageHelper $errorMessageHelper
     )
     {
     }
 
-    public function index(Request $request): JsonResponse|AnonymousResourceCollection
+    public function index(): JsonResponse|AnonymousResourceCollection
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $messages = (new MessageRepository())->getMessagesFromFollowingUsers($user->getAttribute('id'));
-            return MessageResource::collection($messages);
+            return MessageResource::collection(
+                (new MessageRepository)->getMessagesFromFollowingUsers(auth('api')->id())
+            );
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }

@@ -10,8 +10,6 @@ use Illuminate\Http\{JsonResponse, Request};
 
 class ReactionsController
 {
-    use ApiControllerTrait;
-
     public function __construct(
         public ErrorMessageHelper $errorMessageHelper,
         public ReactionService $reactionService
@@ -20,21 +18,19 @@ class ReactionsController
     public function store(Request $request, int $id): JsonResponse|ReactionResource
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $reaction = $this->reactionService->storeReaction($request, $user, $id);
-            return new ReactionResource($reaction);
+            return new ReactionResource(
+                $this->reactionService->storeReaction($request, auth('api')->user(), $id)
+            );
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    public function delete(Request $request, int $id, int $reactionId): JsonResponse
+    public function delete(int $id, int $reactionId): JsonResponse
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $message = $this->reactionService->deleteReaction($user, $id, $reactionId);
             return response()->json([
-                'message' => $message,
+                'message' => $this->reactionService->deleteReaction(auth('api')->user(), $id, $reactionId),
             ]);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);

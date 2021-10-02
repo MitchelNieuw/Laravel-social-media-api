@@ -63,7 +63,8 @@ class BanService
         ?Follow $userFollowStatus,
         int $authenticatedUserId,
         string $operator
-    ): void {
+    ): void
+    {
         if ($userFollowStatus !== null) {
             $status = $this->getNewStatus($userFollowStatus, $authenticatedUserId, $operator, 'ban');
             $this->followRepository->updateFollow($userFollowStatus, $status);

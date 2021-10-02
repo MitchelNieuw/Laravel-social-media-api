@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use App\Exceptions\{PasswordException, UserException};
 use App\Helpers\ErrorMessageHelper;
 use App\Http\Resources\AuthenticatedUserResource;
@@ -13,7 +14,7 @@ use Illuminate\Validation\ValidationException;
 class AuthenticationController
 {
     public function __construct(
-        public ErrorMessageHelper    $errorMessageHelper,
+        public ErrorMessageHelper $errorMessageHelper,
         public AuthenticationService $authenticationService
     )
     {
@@ -23,7 +24,7 @@ class AuthenticationController
     {
         try {
             return new AuthenticatedUserResource($this->authenticationService->apiLogin($request));
-        } catch (ValidationException | UserException | PasswordException $exception) {
+        } catch (ValidationException | UserException | BindingResolutionException | PasswordException $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
@@ -32,6 +33,18 @@ class AuthenticationController
     {
         try {
             return new AuthenticatedUserResource($this->authenticationService->apiRegister($request));
+        } catch (Exception $exception) {
+            return $this->errorMessageHelper->jsonErrorMessage($exception);
+        }
+    }
+
+    public function logout(): JsonResponse
+    {
+        try {
+            auth('api')->logout();
+            return response()->json([
+                'message' => 'Logout successful!'
+            ]);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }

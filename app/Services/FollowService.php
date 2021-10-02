@@ -55,14 +55,6 @@ class FollowService
     /**
      * @throws UserException
      */
-    public function getAllFollowing(string $userTag): Collection
-    {
-        return $this->followRepository->getFollowingUsersWithRelationships($this->checkUserExists($userTag)->id);
-    }
-
-    /**
-     * @throws UserException
-     */
     public function getAllFollowers(string $userTag): Collection
     {
         return $this->followRepository->getFollowersWithRelationships($this->checkUserExists($userTag)->id);

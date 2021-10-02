@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\ResponseMessageEnum;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use App\Exceptions\{MessageException, ReactionException};
 use App\Repositories\{MessageRepository, ReactionRepository};
 use App\Models\{Reaction, User};
@@ -18,15 +19,15 @@ class ReactionService
     {
         $this->validateRequest($request);
         $this->checkMessageExists($messageId);
-        $fileName = $this->storeImage($request, $user);
-        return $this->saveReaction($user->id, $messageId, $request->get('content'), $fileName);
+        return $this->saveReaction(
+            $user->id,
+            $messageId,
+            $request->get('content'),
+            $this->storeImage($request, $user)
+        );
     }
 
     /**
-     * @param User $user
-     * @param int $messageId
-     * @param int $reactionId
-     * @return string
      * @throws MessageException
      * @throws ReactionException
      */
@@ -36,36 +37,31 @@ class ReactionService
         $this->checkMessageExists($messageId);
         $this->checkUserIsOwnerOfReaction($reaction, $user);
         if ($reaction->getAttribute('image') !== null) {
-            unlink(
-                public_path('') . '/reactions/' . $user->getAttribute('tag') . '/' . $reaction->getAttribute('image')
-            );
+            $publicPath = public_path();
+            unlink("$publicPath/reactions/$user->tag/$reaction->image");
         }
         $reaction->delete();
         return ResponseMessageEnum::REACTION_DELETED_SUCCESSFUL;
     }
 
     /**
-     * @param int $reactionId
-     * @return Reaction
      * @throws ReactionException
      */
     private function checkReactionExists(int $reactionId): Reaction
     {
-        if (($reaction = (new ReactionRepository())->getReactionById($reactionId)) === null) {
-            throw new ReactionException('Reaction with this id doesnt exist');
+        if (($reaction = (new ReactionRepository)->getReactionById($reactionId)) === null) {
+            throw new ReactionException('Reaction not found!');
         }
         return $reaction;
     }
 
     /**
-     * @param Reaction $reaction
-     * @param User $user
      * @throws ReactionException
      */
     private function checkUserIsOwnerOfReaction(Reaction $reaction, User $user): void
     {
-        if ($reaction->getAttribute('user_id') !== $user->getAttribute('id')) {
-            throw new ReactionException('You are not the owner of this reaction');
+        if ((int)$reaction->user_id !== (int)$user->id) {
+            throw new ReactionException('You are not the owner of this reaction!');
         }
     }
 
@@ -73,6 +69,7 @@ class ReactionService
     /**
      * @param Request $request
      * @throws ReactionException
+     * @throws BindingResolutionException
      */
     private function validateRequest(Request $request): void
     {
@@ -86,45 +83,35 @@ class ReactionService
     }
 
     /**
-     * @param int $messageId
      * @throws MessageException
      */
     private function checkMessageExists(int $messageId): void
     {
-        if ((new MessageRepository())->findById($messageId) === null) {
-            throw new MessageException('Message with this id doesnt exist');
+        if ((new MessageRepository)->findById($messageId) === null) {
+            throw new MessageException('Message not found!');
         }
     }
 
-    /**
-     * @param Request $request
-     * @param User $user
-     * @return string|null
-     */
     private function storeImage(Request $request, User $user): ?string
     {
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $fileOriginalName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('reactions') . '/' . $user->getAttribute('tag') . '/', $fileOriginalName);
+            $time = time();
+            $fileOriginalName = "{$time}_{$file->getClientOriginalName()}";
+            $publicPath = public_path();
+            $file->move("$publicPath/reactions/$user->tag/$fileOriginalName");
             return $fileOriginalName;
         }
         return null;
     }
 
-    /**
-     * @param int $userId
-     * @param int $messageId
-     * @param string $reactionContent
-     * @param string|null $fileName
-     * @return Reaction
-     */
     private function saveReaction(
         int $userId,
         int $messageId,
         string $reactionContent,
         ?string $fileName = null
-    ): Reaction {
+    ): Reaction
+    {
         return Reaction::create([
             'user_id' => $userId,
             'message_id' => $messageId,

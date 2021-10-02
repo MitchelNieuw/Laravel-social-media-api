@@ -18,7 +18,7 @@ class MessageRepository extends RepositoryBase
     public function getMessagesFromFollowingUsers(int $userId): Collection
     {
         $userIds = $this->removeStatusAndAuthenticatedUserIdFromArray(
-            (new FollowRepository())->getUserIdsOfFollowingUsers($userId),
+            (new FollowRepository)->getUserIdsOfFollowingUsers($userId),
             $userId
         );
         return Message::with('user:id,name,tag,profile_picture', 'reactions', 'reactions.user')

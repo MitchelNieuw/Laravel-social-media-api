@@ -3,12 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\{Builder, Collection};
 
-/**
- * @package App\Repositories
- */
 class UserRepository
 {
     /**
@@ -18,15 +14,6 @@ class UserRepository
     public function create(array $data): User
     {
         return User::create($data);
-    }
-
-    /**
-     * @param string $token
-     * @return User|null
-     */
-    public function getUserByJwtToken(string $token): ?User
-    {
-        return User::where('jwt_token', $token)->first();
     }
 
     /**

@@ -2,50 +2,16 @@
 
 namespace App\Services;
 
-use App\Repositories\{BanRepository, FollowRepository, MessageRepository, NotificationRepository};
-use App\Models\User;
-use Illuminate\View\View;
+use App\Repositories\{BanRepository, FollowRepository, NotificationRepository};
 
 class ProfileService
 {
-    use ServiceTrait;
-
     public function __construct(
         protected FollowRepository $followRepository,
         protected BanRepository $banRepository,
         protected NotificationRepository $notificationRepository
     )
     {
-    }
-
-    public function displayProfile(): View
-    {
-        $userId = auth()->id();
-        $messages = (new MessageRepository())->getMessagesByUserId($userId);
-        $followingCount = $this->followRepository->getFollowingCount($userId);
-        $followersCount = $this->followRepository->getFollowersCount($userId);
-        return view('profile', compact('messages', 'followingCount', 'followersCount'));
-    }
-
-    public function displayUser(User $user): array
-    {
-        $userId = $user->id;
-        $authenticatedUserId = (auth()->user() !== null)
-            ? auth()->id()
-            : null;
-        $arrayStatus = $this->getStatusBetweenUsers($authenticatedUserId, $userId);
-        return [
-            'user' => $user,
-            'messages' => $user->messages()->paginate(20),
-            'possibleFollow' => $arrayStatus['possibleToFollow'],
-            'possibleUnFollow' => $arrayStatus['possibleToUnFollow'],
-            'possibleBan' => $arrayStatus['possibleToBan'],
-            'possibleUnBan' => $arrayStatus['possibleToUnBan'],
-            'possibleTurnOnNotifications' => $arrayStatus['possibleTurnOnNotifications'],
-            'possibleTurnOffNotifications' => $arrayStatus['possibleTurnOffNotifications'],
-            'following' => $this->followRepository->getFollowingCount($userId),
-            'followers' => $this->followRepository->getFollowersCount($userId),
-        ];
     }
 
     public function getStatusBetweenUsers(?int $authenticatedUserId, int $userId): array

@@ -19,7 +19,9 @@ class MessageObserver
     public function deleted(Message $message): void
     {
         DB::table('notifications')->where('data', 'like', '%\"messageId\":' . $message->id . '%')->delete();
-        Reaction::where('message_id', $message->id)->delete();
+        $message->reactions()->each(function ($reaction) {
+            $reaction->delete();
+        });
     }
 
     private function notifyAllExistingTaggedUsers(Message $message): array

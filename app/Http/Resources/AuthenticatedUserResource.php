@@ -3,7 +3,6 @@
 namespace App\Http\Resources;
 
 use App\Repositories\FollowRepository;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AuthenticatedUserResource extends JsonResource
@@ -15,7 +14,7 @@ class AuthenticatedUserResource extends JsonResource
             'name' => $this->resource->name,
             'email' => $this->resource->email,
             'tag' => $this->resource->tag,
-            'jwtToken' => $this->resource->jwt_token,
+            'jwtToken' => auth('api')->login($this->resource),
             'profilePicture' => $this->resource->profile_picture,
             'createdAt' => $this->resource->created_at,
             'followerCount' => (new FollowRepository())->getFollowersCount($this->resource->id),

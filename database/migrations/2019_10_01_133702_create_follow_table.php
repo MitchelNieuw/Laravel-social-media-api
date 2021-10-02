@@ -6,26 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateFollowTable extends Migration
 {
-    /**
-     */
     public function up(): void
     {
-        Schema::create('follow', static function (Blueprint $table) {
+        Schema::create('follows', static function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('user_id')->unsigned();
-            $table->bigInteger('follow_user_id')->unsigned();
+            $table->foreignId('user_id')->references('id')->on('users');
+            $table->foreignId('follow_user_id')->references('id')->on('users');
             $table->tinyInteger('status')->default(0);
             $table->timestamps();
-
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('follow_user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
-    /**
-     */
     public function down(): void
     {
-        Schema::dropIfExists('follow');
+        Schema::dropIfExists('follows');
     }
 }
