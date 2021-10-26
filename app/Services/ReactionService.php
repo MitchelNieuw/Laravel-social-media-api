@@ -36,7 +36,7 @@ class ReactionService
         $reaction = $this->checkReactionExists($reactionId);
         $this->checkMessageExists($messageId);
         $this->checkUserIsOwnerOfReaction($reaction, $user);
-        if ($reaction->getAttribute('image') !== null) {
+        if ($reaction->image !== null) {
             $publicPath = public_path();
             unlink("$publicPath/reactions/$user->tag/$reaction->image");
         }

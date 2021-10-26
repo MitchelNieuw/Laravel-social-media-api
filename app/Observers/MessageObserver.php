@@ -26,21 +26,20 @@ class MessageObserver
 
     private function notifyAllExistingTaggedUsers(Message $message): array
     {
-        $messageContent = $message->getAttribute('content');
         $authenticatedUserId = $message->user->id;
-        $arrayString = explode(' ', $messageContent);
+        $arrayString = explode(' ', $message->content);
         $allTaggedUserIds = [];
         foreach ($arrayString as $item) {
             if (str_contains($item, '@')) {
                 $taggedUser = preg_replace('/@/', '', $item);
-                $user = (new UserRepository())->getUserByUserTag($taggedUser);
+                $user = (new UserRepository)->getUserByUserTag($taggedUser);
                 $allTaggedUserIds[] = $this->userTaggedInMessageExistsSendNotification(
                     $user,
                     $authenticatedUserId,
                     $message
                 );
             }
-            if (count($allTaggedUserIds) === env('MAX_TAG_ABLE_USERS_IN_MESSAGE')) {
+            if (count($allTaggedUserIds) > env('MAX_TAG_ABLE_USERS_IN_MESSAGE')) {
                 break;
             }
         }

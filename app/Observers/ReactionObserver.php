@@ -18,9 +18,9 @@ class ReactionObserver
         $authenticatedUser = (new UserRepository)->getUserById($reaction->user_id);
         $userForNotification =  (new UserRepository)->getUserById($reaction->message->user_id);
         if (
-            $authenticatedUser !== null
-            && $userForNotification !== null
-            && $this->checkSendNotificationIsPossible($userForNotification, $authenticatedUser) !== null
+            $authenticatedUser !== null &&
+            $userForNotification !== null &&
+            $this->checkSendNotificationIsPossible($userForNotification, $authenticatedUser) !== null
         ) {
             $userForNotification->notify(
                 new UserReactionNotification($reaction->user->tag, $reaction->message_id)
