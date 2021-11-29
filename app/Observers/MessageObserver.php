@@ -2,59 +2,44 @@
 
 namespace App\Observers;
 
-use App\Message;
-use App\Notifications\UserNewMessageNotification;
-use App\Notifications\UserTaggedInMessage;
-use App\Reaction;
-use App\Repositories\NotificationRepository;
-use App\Repositories\UserRepository;
-use App\User;
+use App\Models\Message;
+use App\Notifications\{UserNewMessageNotification, UserTaggedInMessage};
+use App\Models\Reaction;
+use App\Repositories\{NotificationRepository, UserRepository};
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-/**
- * @package App\Observers
- */
 class MessageObserver
 {
-    /**
-     * @param Message $message
-     */
     public function created(Message $message): void
     {
-        $allTaggedUserIds = $this->notifyAllExistingTaggedUsers($message);
-        $this->notifyUsersWhenNotTagged($message, $allTaggedUserIds);
+        $this->notifyUsersWhenNotTagged($message, $this->notifyAllExistingTaggedUsers($message));
     }
 
-    /**
-     * @param Message $message
-     */
     public function deleted(Message $message): void
     {
-        DB::table('notifications')->where('data', 'like', '%\"messageId\":'.$message->id.'%' )->delete();
-        Reaction::where('message_id', $message->getAttribute('id'))->delete();
+        DB::table('notifications')->where('data', 'like', '%\"messageId\":' . $message->id . '%')->delete();
+        $message->reactions()->each(function ($reaction) {
+            $reaction->delete();
+        });
     }
 
-    /**
-     * @param Message $message
-     * @return array
-     */
     private function notifyAllExistingTaggedUsers(Message $message): array
     {
-        $messageContent = $message->getAttribute('content');
         $authenticatedUserId = $message->user->id;
-        $arrayString = explode(' ', $messageContent);
+        $arrayString = explode(' ', $message->content);
         $allTaggedUserIds = [];
         foreach ($arrayString as $item) {
-            if (strpos($item, '@') !== false) {
+            if (str_contains($item, '@')) {
                 $taggedUser = preg_replace('/@/', '', $item);
-                $user = (new UserRepository())->getUserByUserTag($taggedUser);
+                $user = (new UserRepository)->getUserByUserTag($taggedUser);
                 $allTaggedUserIds[] = $this->userTaggedInMessageExistsSendNotification(
                     $user,
                     $authenticatedUserId,
                     $message
                 );
             }
-            if (count($allTaggedUserIds) === env('MAX_TAG_ABLE_USERS_IN_MESSAGE')) {
+            if (count($allTaggedUserIds) > env('MAX_TAG_ABLE_USERS_IN_MESSAGE')) {
                 break;
             }
         }
@@ -74,7 +59,7 @@ class MessageObserver
         Message $message
     ) {
         if ($user !== null) {
-            $taggedUserId = $user->getAttribute('id');
+            $taggedUserId = $user->id;
             if ($this->checkNotificationPossibleToSend($user, $taggedUserId, $authenticatedUserId)) {
                 $user->notify(new UserTaggedInMessage($message->user->tag, $message));
                 return $taggedUserId;
@@ -82,14 +67,11 @@ class MessageObserver
         }
     }
 
-    /**
-     * @param User $user
-     * @param int $taggedUserId
-     * @param int $authenticatedUserId
-     * @return bool
-     */
-    private function checkNotificationPossibleToSend(User $user, int $taggedUserId, int $authenticatedUserId): bool
-    {
+    private function checkNotificationPossibleToSend(
+        User $user,
+        int $taggedUserId,
+        int $authenticatedUserId
+    ): bool {
         $query = $user->following()
             ->where('user_id', $taggedUserId)
             ->where('follow_user_id', $authenticatedUserId)
@@ -105,29 +87,21 @@ class MessageObserver
         return !($query === null);
     }
 
-    /**
-     * @param Message $message
-     * @param array $allTaggedUserIds
-     */
     private function notifyUsersWhenNotTagged(Message $message, array $allTaggedUserIds): void
     {
-        $users = (new UserRepository())->getUsersByIds($this->getUserIdsForNotifications($message->user->id));
+        $users = (new UserRepository)->getUsersByIds($this->getUserIdsForNotifications($message->user->id));
         if ($users->isNotEmpty()) {
             foreach ($users as $user) {
-                if (!in_array((int)$user->getAttribute('id'), $allTaggedUserIds, true)) {
+                if (!in_array((int)$user->id, $allTaggedUserIds, true)) {
                     $user->notify(new UserNewMessageNotification($message->user->tag, $message->id));
                 }
             }
         }
     }
 
-    /**
-     * @param int $authenticatedUserId
-     * @return array
-     */
     private function getUserIdsForNotifications(int $authenticatedUserId): array
     {
-        $notificationRepository = (new NotificationRepository());
+        $notificationRepository = (new NotificationRepository);
         return $notificationRepository->removeStatusAndAuthenticatedUserIdFromArray(
             $notificationRepository->getUserIdsWhereNotificationsArePossible($authenticatedUserId),
             $authenticatedUserId

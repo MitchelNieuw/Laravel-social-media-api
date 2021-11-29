@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateNotificationsTable extends Migration
 {
-    /**
-     * @return void
-     */
     public function up(): void
     {
         Schema::create('notifications', static function (Blueprint $table) {
@@ -21,9 +18,6 @@ class CreateNotificationsTable extends Migration
         });
     }
 
-    /**
-     * @return void
-     */
     public function down(): void
     {
         Schema::dropIfExists('notifications');

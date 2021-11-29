@@ -3,14 +3,9 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Http\Response;
 
-/**
- * @package App\Exceptions
- */
 class ReactionException extends Exception
 {
-    /**
-     * @var int
-     */
-    protected $code = 400;
+    protected $code = Response::HTTP_BAD_REQUEST;
 }

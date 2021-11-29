@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Message;
+use App\Models\Message;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -18,10 +18,10 @@ class MessageRepository extends RepositoryBase
     public function getMessagesFromFollowingUsers(int $userId): Collection
     {
         $userIds = $this->removeStatusAndAuthenticatedUserIdFromArray(
-            (new FollowRepository())->getUserIdsOfFollowingUsers($userId),
+            (new FollowRepository)->getUserIdsOfFollowingUsers($userId),
             $userId
         );
-        return Message::with('user:id,name,tag,profilePicture', 'reactions', 'reactions.user')
+        return Message::with(['user:id,name,tag,profile_picture', 'reactions', 'reactions.user'])
             ->whereIn('user_id', $userIds)
             ->orderByDesc('created_at')
             ->get();

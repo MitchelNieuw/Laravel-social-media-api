@@ -2,24 +2,19 @@
 
 namespace App\Services;
 
-use App\Exceptions\PasswordException;
-use App\Exceptions\UserException;
+use App\Exceptions\{PasswordException, UserException};
 use App\Repositories\UserRepository;
-use App\User;
+use App\Models\User;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
-/**
- * @package App\Services
- */
 class AuthenticationService
 {
     /**
-     * @param Request $request
-     * @return User
+     * @throws BindingResolutionException
      * @throws PasswordException
      * @throws UserException
      * @throws ValidationException
@@ -28,15 +23,12 @@ class AuthenticationService
     {
         $this->validateLoginRequest($request);
         $user = $this->checkUserWithThisEmailExists($request->get('email'));
-        $this->checkCorrectPassword($request->get('password'), $user->getAttribute('password'));
-        $user->setAttribute('jwt_token', JWTAuth::fromUser($user));
-        $user->save();
+        $this->checkCorrectPassword($request->get('password'), $user->password);
         return $user;
     }
 
     /**
-     * @param Request $request
-     * @return User
+     * @throws BindingResolutionException
      */
     public function apiRegister(Request $request): User
     {
@@ -47,13 +39,14 @@ class AuthenticationService
     /**
      * @param Request $request
      * @throws ValidationException
+     * @throws BindingResolutionException
      */
     private function validateLoginRequest(Request $request): void
     {
 
         $validator = validator()->make($request->all(), [
             'email' => 'required|string|email',
-            'password' => 'required|string',
+            'password' => 'required|string|max:255',
         ]);
         if ($validator->fails()) {
             throw new ValidationException($validator);
@@ -61,33 +54,28 @@ class AuthenticationService
     }
 
     /**
-     * @param string $email
-     * @return User
      * @throws UserException
      */
     private function checkUserWithThisEmailExists(string $email): User
     {
-        $user = (new UserRepository())->getUserByEmail($email);
-        if ($user === null) {
-            throw new UserException('User with this email not found');
+        if (($user = (new UserRepository)->getUserByEmail($email)) === null) {
+            throw new UserException('User with this email not found!');
         }
         return $user;
     }
 
     /**
-     * @param string $requestPassword
-     * @param string $userPassword
      * @throws PasswordException
      */
     private function checkCorrectPassword(string $requestPassword, string $userPassword): void
     {
         if (!Hash::check($requestPassword, $userPassword)) {
-            throw new PasswordException('Password not correct');
+            throw new PasswordException('Wrong email password combination!');
         }
     }
 
     /**
-     * @param Request $request
+     * @throws BindingResolutionException
      */
     private function validateRegisterRequest(Request $request): void
     {
@@ -102,36 +90,27 @@ class AuthenticationService
         }
     }
 
-    /**
-     * @param Request $request
-     * @return string
-     */
     private function storeProfilePicture(Request $request): string
     {
         $fileOriginalName = 'profile.png';
         if ($request->hasFile('profilePicture')) {
             $file = $request->file('profilePicture');
-            $fileOriginalName = time() . '_' . $request->get('tag') . '_' . $file->getClientOriginalName();
-            $file->move(public_path('') . '/profilePictures/', $fileOriginalName);
+            $time = time();
+            $fileOriginalName = "{$time}_{$request->get('tag')}_{$file->getClientOriginalName()}";
+            $publicPath = public_path();
+            $file->move("$publicPath/profilePictures/$fileOriginalName");
         }
         return $fileOriginalName;
     }
 
-    /**
-     * @param Request $request
-     * @param string $profilePicture
-     * @return User
-     */
     private function createUser(Request $request, string $profilePicture): User
     {
-        $user = (new UserRepository())->create([
+        return (new UserRepository)->create([
             'name' => $request->get('name'),
             'tag' => $request->get('tag'),
             'email' => $request->get('email'),
-            'profilePicture' => $profilePicture,
+            'profile_picture' => $profilePicture,
             'password' => Hash::make($request->get('password')),
         ]);
-        $user->update(['jwt_token' => JWTAuth::fromUser($user)]);
-        return $user;
     }
 }

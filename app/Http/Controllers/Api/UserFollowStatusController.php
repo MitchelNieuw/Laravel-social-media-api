@@ -2,179 +2,83 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\BanException;
-use App\Exceptions\FollowException;
-use App\Exceptions\NotificationException;
-use App\Exceptions\UserException;
 use App\Helpers\ErrorMessageHelper;
-use App\Http\Controllers\Controller;
-use App\Services\BanService;
-use App\Services\FollowService;
-use App\Services\NotificationService;
+use App\Services\{BanService, FollowService, NotificationService};
 use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\{JsonResponse, Request};
 
-/**
- * @package App\Http\Controllers\Api
- */
-class UserFollowStatusController extends Controller
+class UserFollowStatusController
 {
-    use ApiControllerTrait;
-
-    /**
-     * @var ErrorMessageHelper
-     */
-    protected $errorMessageHelper;
-
-    /**
-     * @var FollowService
-     */
-    protected $followService;
-
-    /**
-     * @var BanService
-     */
-    protected $banService;
-
-    /**
-     * @var NotificationService
-     */
-    protected $notificationService;
-
-    /**
-     * @param ErrorMessageHelper $errorMessageHelper
-     * @param FollowService $followService
-     * @param BanService $banService
-     * @param NotificationService $notificationService
-     */
     public function __construct(
-        ErrorMessageHelper $errorMessageHelper,
-        FollowService $followService,
-        BanService $banService,
-        NotificationService $notificationService
-    ) {
-        $this->errorMessageHelper = $errorMessageHelper;
-        $this->followService = $followService;
-        $this->banService = $banService;
-        $this->notificationService = $notificationService;
+        public ErrorMessageHelper $errorMessageHelper,
+        public FollowService $followService,
+        public BanService $banService,
+        public NotificationService $notificationService
+    )
+    {
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
-    public function follow(Request $request, string $tag): JsonResponse
+    public function follow(string $tag): JsonResponse
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $message = $this->followService->follow($tag, $user->getAttribute('id'));
             return response()->json([
-                'message' => $message,
+                'message' => $this->followService->follow($tag, auth('api')->id()),
             ]);
-        } catch (FollowException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
-    public function unFollow(Request $request, string $tag): JsonResponse
+    public function unFollow(string $tag): JsonResponse
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $message = $this->followService->unFollow($tag, $user->getAttribute('id'));
             return response()->json([
-                'message' => $message,
+                'message' => $this->followService->unFollow($tag, auth('api')->id()),
             ]);
-        } catch (FollowException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
-    public function ban(Request $request, string $tag): JsonResponse
+    public function ban(string $tag): JsonResponse
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $message = $this->banService->banUserByTag($tag, $user->getAttribute('id'));
             return response()->json([
-                'message' => $message,
+                'message' => $this->banService->banUserByTag($tag, auth('api')->id()),
             ]);
-        } catch (BanException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
-    public function unBan(Request $request, string $tag): JsonResponse
+    public function unBan(string $tag): JsonResponse
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $message = $this->banService->unBanByUserTag($tag, $user->getAttribute('id'));
             return response()->json([
-                'message' => $message,
+                'message' => $this->banService->unBanByUserTag($tag, auth('api')->id()),
             ]);
-        } catch (BanException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
-    public function notificationsOn(Request $request, string $tag): JsonResponse
+    public function notificationsOn(string $tag): JsonResponse
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $message = $this->notificationService->turnOnNotifications($tag, $user->getAttribute('id'));
             return response()->json([
-                'message' => $message,
+                'message' => $this->notificationService->turnOnNotifications($tag, auth('api')->id()),
             ]);
-        } catch (NotificationException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**
-     * @param Request $request
-     * @param string $tag
-     * @return JsonResponse
-     */
-    public function notificationsOff(Request $request, string $tag): JsonResponse
+    public function notificationsOff(string $tag): JsonResponse
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $message = $this->notificationService->turnOffNotifications($tag, $user->getAttribute('id'));
             return response()->json([
-                'message' => $message,
+                'message' => $this->notificationService->turnOffNotifications($tag, auth('api')->id()),
             ]);
-        } catch (NotificationException | UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }

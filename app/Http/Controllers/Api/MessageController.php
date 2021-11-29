@@ -2,92 +2,51 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\MessageException;
-use App\Exceptions\UserException;
 use App\Helpers\ErrorMessageHelper;
-use App\Http\Controllers\Controller;
 use App\Http\Resources\MessageResource;
 use App\Repositories\MessageRepository;
 use App\Services\MessageService;
 use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\{JsonResponse, Request, Resources\Json\AnonymousResourceCollection};
 
-/**
- * @package App\Http\Controllers\Api
- */
-class MessageController extends Controller
+class MessageController
 {
-    use ApiControllerTrait;
-
-    /**
-     * @var MessageService
-     */
-    protected $messageService;
-
-    /**
-     * @var ErrorMessageHelper
-     */
-    protected $errorMessageHelper;
-
-    /**
-     * @param MessageService $messageService
-     * @param ErrorMessageHelper $errorMessageHelper
-     */
-    public function __construct(MessageService $messageService, ErrorMessageHelper $errorMessageHelper)
+    public function __construct(
+        public MessageService $messageService,
+        public ErrorMessageHelper $errorMessageHelper
+    )
     {
-        $this->messageService = $messageService;
-        $this->errorMessageHelper = $errorMessageHelper;
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse|AnonymousResourceCollection
-     */
-    public function list(Request $request)
+    public function list(): JsonResponse|AnonymousResourceCollection
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $messages = (new MessageRepository())->getMessagesByUserId($user->getAttribute('id'));
-            return MessageResource::collection($messages);
-        } catch (UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
+            return MessageResource::collection(
+                (new MessageRepository())->getMessagesByUserId(auth('api')->id())
+            );
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**v
-     * @param Request $request
-     * @return MessageResource|JsonResponse
-     */
-    public function store(Request $request)
+    public function store(Request $request): MessageResource|JsonResponse
     {
         try {
-            $user = $this->checkUserOfTokenExists($request);
-            $message = $this->messageService->storeMessage($request, $user);
-            return new MessageResource($message);
-        } catch (UserException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
+            return new MessageResource(
+                $this->messageService->storeMessage($request, auth('api')->user())
+            );
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }
     }
 
-    /**
-     * @param int $messageId
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function delete(int $messageId, Request $request): JsonResponse
+    public function delete(int $messageId): JsonResponse
     {
         try {
-            $authenticatedUser = $this->checkUserOfTokenExists($request);
-            $this->messageService->deleteMessage($messageId, $authenticatedUser->getAttribute('id'));
-            return response()->json(['message' => 'Delete successful!',]);
-        } catch (MessageException $exception) {
-            return $this->errorMessageHelper->jsonErrorMessage($exception);
+            $this->messageService->deleteMessage($messageId, auth('api')->id());
+            return response()->json([
+                'message' => 'Delete successful!',
+            ]);
         } catch (Exception $exception) {
             return $this->errorMessageHelper->jsonErrorMessage($exception);
         }

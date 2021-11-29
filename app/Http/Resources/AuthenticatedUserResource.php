@@ -3,18 +3,10 @@
 namespace App\Http\Resources;
 
 use App\Repositories\FollowRepository;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @package App\Http\Resources
- */
 class AuthenticatedUserResource extends JsonResource
 {
-    /**
-     * @param Request $request
-     * @return array
-     */
     public function toArray($request): array
     {
         return [
@@ -22,8 +14,8 @@ class AuthenticatedUserResource extends JsonResource
             'name' => $this->resource->name,
             'email' => $this->resource->email,
             'tag' => $this->resource->tag,
-            'jwtToken' => $this->resource->jwt_token,
-            'profilePicture' => $this->resource->profilePicture,
+            'jwtToken' => auth('api')->login($this->resource),
+            'profilePicture' => $this->resource->profile_picture,
             'createdAt' => $this->resource->created_at,
             'followerCount' => (new FollowRepository())->getFollowersCount($this->resource->id),
             'followingCount' => (new FollowRepository())->getFollowingCount($this->resource->id),

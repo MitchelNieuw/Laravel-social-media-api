@@ -2,35 +2,16 @@
 
 namespace App\Providers;
 
-use App\Message;
-use App\Observers\MessageObserver;
-use App\Observers\ReactionObserver;
-use App\Observers\UserObserver;
-use App\Reaction;
-use App\User;
+use App\Observers\{MessageObserver, ReactionObserver, UserObserver};
+use App\Models\{Message, Reaction, User};
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        //
-    }
-
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
         Message::observe(MessageObserver::class);
-        User::observe(UserObserver::class);
         Reaction::observe(ReactionObserver::class);
+        User::observe(UserObserver::class);
     }
 }

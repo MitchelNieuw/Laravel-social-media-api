@@ -2,9 +2,6 @@
 
 namespace App\Enums;
 
-/**
- * @package App\Enums
- */
 class FollowEnum
 {
     public const USER1_FOLLOWS_USER2 = 1 << 0; // 000001 = 1

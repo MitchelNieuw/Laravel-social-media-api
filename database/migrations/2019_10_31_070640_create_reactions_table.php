@@ -12,14 +12,11 @@ class CreateReactionsTable extends Migration
     {
         Schema::create('reactions', static function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('message_id')->unsigned();
-            $table->bigInteger('user_id')->unsigned();
+            $table->foreignId('message_id')->references('id')->on('message');
+            $table->foreignId('user_id')->references('id')->on('users');
             $table->text('content');
-            $table->string('image', 255)->nullable();
+            $table->string('image')->nullable();
             $table->timestamps();
-
-            $table->foreign('message_id')->references('id')->on('message')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

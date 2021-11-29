@@ -5,22 +5,21 @@ namespace App\Helpers;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use JsonException;
 
-/**
- * @package App\Helpers
- */
 class ErrorMessageHelper
 {
     /**
      * @param Exception $exception
      * @return JsonResponse
      */
-    public function jsonErrorMessage(Exception $exception): JsonResponse {
-        if ($exception->getCode() === 500) {
-            Log::critical(json_encode($this->prepareInternalServerError($exception), JSON_THROW_ON_ERROR, 512));
+    public function jsonErrorMessage(Exception $exception): JsonResponse
+    {
+        $code = (int)$exception->getCode();
+        if ($code === 500) {
+            Log::critical(json_encode($this->prepareInternalServerError($exception)));
         }
-        $code = $exception->getCode();
-        if ($exception->getCode() === 0) {
+        if ($code === 0) {
             $code = 500;
         }
         return response()->json($this->prepareErrorMessage($exception), $code);

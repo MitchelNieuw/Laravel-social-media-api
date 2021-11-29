@@ -2,20 +2,23 @@
 
 namespace App\Observers;
 
-use App\User;
+use App\Models\User;
 
-/**
- * @package App\Observers
- */
 class UserObserver
 {
-    /**
-     * @param User $user
-     */
     public function deleted(User $user): void
     {
-        $user->messages()->delete();
-        $user->reactions()->delete();
-        $user->notifications()->delete();
+        $user->messages()->each(function ($message) {
+            $message->delete();
+        });
+        $user->reactions()->each(function ($reaction) {
+            $reaction->delete();
+        });
+        $user->followed()->each(function ($follower) {
+            $follower->delete();
+        });
+        $user->following()->each(function ($follower) {
+            $follower->delete();
+        });
     }
 }

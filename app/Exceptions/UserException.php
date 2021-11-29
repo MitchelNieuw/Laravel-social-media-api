@@ -3,14 +3,9 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Http\Response;
 
-/**
- * @package App\Exceptions
- */
 class UserException extends Exception
 {
-    /**
-     * @var int
-     */
-    protected $code = 404;
+    protected $code = Response::HTTP_BAD_REQUEST;
 }
